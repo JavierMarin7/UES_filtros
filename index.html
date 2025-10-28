@@ -130,7 +130,7 @@
         <div class="title-wrap">
           <h1 class="h5 m-0 truncate-1">Tablero – Encuestas de Saneamiento con Filtros de Agua</h1>
           <div class="small text-muted meta-line mt-1">
-            <span>Fuente: Google Sheets (CSV)</span>
+            <span>Fuente: https://github.com (CSV)</span>
             <span id="lastUpdate" class="badge text-bg-light border">Cargando…</span>
           </div>
         </div>
@@ -649,34 +649,32 @@
       borderRadius: 6
     }]
   },
-  plugins: [ChartDataLabels], // ✅ activa el plugin
-  options: {
-    maintainAspectRatio: false,
-    responsive: true,
-    indexAxis: "y",
-    plugins: {
-      legend: { display: false },
-      datalabels: {               // 🎯 configuración de etiquetas
-        anchor: 'end',
-        align: 'right',
-        clamp: true,
-        color: '#1f2937',
-        font: { weight: '700' },
-        formatter: v => Number(v).toLocaleString('es-CO'),
-        padding: { right: 6 }
-      },
-      tooltip: {
-        callbacks: {
-          label: ctx => ` ${ctx.raw} encuestas`
-        }
-      }
+  plugins: [ChartDataLabels],
+options: {
+  maintainAspectRatio: false,
+  responsive: true,
+  indexAxis: "y",
+  plugins: {
+    legend: { display: false },
+    datalabels: {
+      // 👉 número DENTRO de la barra, pegado al extremo derecho
+      anchor: 'end',      // ancla al final de la barra (lado derecho)
+      align: 'right',     // alineación hacia adentro de la barra
+      offset: -30,         // valor negativo = empuja hacia adentro
+      clamp: true,
+      clip: true,
+      color: '#0f172a',
+      font: { weight: 700 },
+      formatter: v => Number(v).toLocaleString('es-CO')
     },
-    scales: {
-      x: {
-        beginAtZero: true,
-        ticks: { precision: 0 }
-      }
-    },
+    tooltip: {
+      callbacks: { label: c => ` ${c.raw.toLocaleString('es-CO')} encuestas` }
+    }
+  },
+  scales: {
+    x: { beginAtZero: true, ticks: { precision: 0 } }
+  },
+  
     onClick: (evt, elements) => {
       if (!elements?.length) return;
       const i = elements[0].index;

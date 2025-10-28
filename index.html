@@ -42,6 +42,61 @@
     #legend i { display:inline-block; width:12px; height:12px; border-radius:50%; margin-right:6px; vertical-align:middle; }
 
     .dt-buttons .btn{ margin-right:.25rem }
+	
+	/* ======= Header UESVALLE responsive ======= */
+.header-ues {
+  background: #fff;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.header-ues .brand-strip {
+  display: flex;
+  flex-wrap: wrap;          /* Permite que los logos bajen a segunda línea */
+  align-items: center;
+  gap: .5rem .75rem;        /* Espacio entre logos */
+}
+
+.header-ues .brand-strip img {
+  height: 48px;             /* Tamaño por defecto en desktop/tablet */
+  width: auto;
+}
+
+.header-ues .title-wrap {
+  min-width: 220px;
+}
+
+/* XS: teléfonos */
+@media (max-width: 576px) {
+  .header-ues .brand-strip img {
+    height: 32px;           /* Logos más pequeños en móvil */
+  }
+  .header-ues .title-wrap h1 {
+    font-size: 1rem;        /* Título más compacto */
+    line-height: 1.25;
+  }
+  .header-ues .meta-line {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .25rem .5rem;
+  }
+  .header-ues .meta-line .badge {
+    font-size: .75rem;
+  }
+  .board {                  /* un poco más de “respiro” lateral en móvil */
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+  #map { height: 60vh; }    /* mapa más alto en móvil, opcional */
+}
+
+/* Truncamiento elegante por si el texto se alarga */
+.truncate-1 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+	
+	
   </style>
 </head>
 <body>
@@ -58,20 +113,34 @@
     <div class="board">
 
       <!-- Header UESVALLE -->
-      <header class="py-2 mb-3">
-        <div class="container-fluid px-3 d-flex align-items-center gap-3">
-          <img class="logo" src="https://www.uesvalle.gov.co/info/uesvalle/media/bloque1656.png" alt="UESVALLE">
-          <div class="me-auto">
-            <h1 class="h5 m-0">Tablero – Encuestas de Saneamiento con Filtros de Agua</h1>
-            <div class="small text-muted">
-              Fuente: githubusercontent.com (CSV)
-              <span id="lastUpdate" class="badge text-bg-light border ms-2">Cargando…</span>
-            </div>
+      
+<header class="header-ues py-2">
+	<div class="container-fluid px-3">
+		<div class="row g-2 align-items-center">
+      
+      <!-- Logos (se acomodan en varias líneas en móvil) -->
+     <div class="col-12 col-lg-6">
+        <div class="brand-strip">
+          <img src="https://www.uesvalle.gov.co/info/uesvalle/media/bloque1656.png" alt="UESVALLE" loading="lazy">
+          </div>
+     </div>
+
+      <!-- Título + meta -->
+      <div class="col-12 col-lg-6">
+        <div class="title-wrap">
+          <h1 class="h5 m-0 truncate-1">Tablero – Encuestas de Saneamiento con Filtros de Agua</h1>
+          <div class="small text-muted meta-line mt-1">
+            <span>Fuente: Google Sheets (CSV)</span>
+            <span id="lastUpdate" class="badge text-bg-light border">Cargando…</span>
           </div>
         </div>
-      </header>
+      </div>
 
-      <!-- Filtros -->
+    </div>
+  </div>
+</header>
+     
+	 <!-- Filtros -->
       <section class="container-fluid px-3 my-3">
         <section class="soft-card p-3 mb-3">
           <div class="row g-3 align-items-end">

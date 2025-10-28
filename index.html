@@ -311,22 +311,26 @@
   </main>
 
   <!-- Librerías JS -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+ <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-  <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
-  <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
-  <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
-  <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap5.min.js"></script>
-  <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
-  <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<!-- ✅ Chart.js + Plugin de etiquetas -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
 
-  <!-- Script principal -->
+<!-- CSV Parser -->
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  
+  
   <script>
   /* =========================================================
      TABLERO – Encuestas de Saneamiento con Filtros de Agua
@@ -633,23 +637,63 @@
     const encMunCounts = pairs.map(x=>x[1]);
 
     ensureChart("chartEncuestasMunicipio", {
-      type: "bar",
-      data: { labels: encMunLabels, datasets: [{ label: "Encuestas", data: encMunCounts }] },
-      options: {
-        maintainAspectRatio: false, responsive: true, indexAxis: 'y',
-        plugins: { legend: { display: false } },
-        scales: { x: { beginAtZero: true, ticks: { precision:0 } } },
-        onClick: (evt, elements) => {
-          if (!elements?.length) return;
-          const i = elements[0].index;
-          const municipio = encMunLabels[i];
-          const sel = document.getElementById('fmpio'); if (!sel) return;
-          if (evt.ctrlKey || evt.metaKey) { sel.value = ""; applyFiltersAndRender(true); }
-          else { sel.value = municipio; applyFiltersAndRender(); }
-          setTimeout(() => fitBoundsToPoints(LIST), 0);
+  type: "bar",
+  data: {
+    labels: encMunLabels,
+    datasets: [{
+      label: "Encuestas",
+      data: encMunCounts,
+      backgroundColor: "rgba(0,123,255,.35)",
+      borderColor: "#007bff",
+      borderWidth: 1,
+      borderRadius: 6
+    }]
+  },
+  plugins: [ChartDataLabels], // ✅ activa el plugin
+  options: {
+    maintainAspectRatio: false,
+    responsive: true,
+    indexAxis: "y",
+    plugins: {
+      legend: { display: false },
+      datalabels: {               // 🎯 configuración de etiquetas
+        anchor: 'end',
+        align: 'right',
+        clamp: true,
+        color: '#1f2937',
+        font: { weight: '700' },
+        formatter: v => Number(v).toLocaleString('es-CO'),
+        padding: { right: 6 }
+      },
+      tooltip: {
+        callbacks: {
+          label: ctx => ` ${ctx.raw} encuestas`
         }
       }
-    });
+    },
+    scales: {
+      x: {
+        beginAtZero: true,
+        ticks: { precision: 0 }
+      }
+    },
+    onClick: (evt, elements) => {
+      if (!elements?.length) return;
+      const i = elements[0].index;
+      const municipio = encMunLabels[i];
+      const sel = document.getElementById("fmpio");
+      const limpiar = evt.ctrlKey || evt.metaKey;
+      if (limpiar) {
+        sel.value = "";
+        applyFiltersAndRender(true);
+      } else {
+        sel.value = municipio;
+        applyFiltersAndRender();
+      }
+      setTimeout(() => fitBoundsToPoints(LIST), 0);
+    }
+  }
+});
 
     // 2) Salud apilada por municipio
     const saludSI = munLabels.map(m=>byMun.get(m).filter(r=>r.SALUD==="SI").length);

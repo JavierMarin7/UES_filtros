@@ -1,0 +1,1986 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <title>Tablero – IRCAS UESVALLE</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet"/>
+  <link href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css" rel="stylesheet"/>
+  <link href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet"/>
+
+  <style>
+    :root{
+      --board-max: 1460px;
+      --shadow-soft: 0 8px 24px rgba(0,0,0,.06);
+      --border-soft: 1px solid #e9ecef;
+      --brand-blue: #2e64d2;
+      --bg-page: #f4f6f8;
+      --text-muted:#667085;
+    }
+
+    body{ background:var(--bg-page); color:#212529; }
+    .gov-banner{ background-color:#2e64d2; height:46px; width:100%; }
+    .gov-banner img{ height:30px; }
+    .bg-shell{ min-height:100vh; background:var(--bg-page); }
+    .board{ max-width:var(--board-max); margin:0 auto; padding:24px 16px 36px; }
+
+    .soft-card,.kpi-card,.chart-card,.nav-card,header,.analytic-card{
+      border:0; border-radius:1rem; box-shadow:var(--shadow-soft); background:#fff;
+    }
+
+    .header-ues{ border-bottom:var(--border-soft); }
+    .header-ues .brand-strip{
+      display:flex; justify-content:center; align-items:center; gap:.75rem; flex-wrap:wrap;
+    }
+    .header-ues .brand-strip img{ max-width:100%; height:auto; }
+
+    .board-title{
+      font-size:clamp(1.5rem,2vw,2.1rem);
+      font-weight:800; color:#1f2937; margin:0;
+    }
+    .board-subtitle{ color:var(--text-muted); font-size:.95rem; }
+    .last-update-badge{ font-size:.95rem; padding:.5rem .8rem; border-radius:999px; }
+
+    .navbar .nav-link,.navbar .dropdown-toggle{ font-weight:600; }
+    .dropdown-menu .dropdown-item.active{ background:#2e64d2; }
+
+    .nav-processes{
+      display:flex; flex-wrap:wrap; justify-content:center; align-items:center;
+    }
+    .process-btn{
+      background:#f8fafc; border:1px solid #d0d5dd; border-radius:999px;
+      padding:.65rem 1rem !important; color:#344054 !important; font-weight:700;
+      box-shadow:0 2px 6px rgba(0,0,0,.04); transition:all .2s ease;
+    }
+    .process-btn:hover{ background:#eef4ff; border-color:#98a2b3; }
+    .process-btn.active{ background:#2e64d2; color:#fff !important; border-color:#2e64d2; }
+
+    .kpi-card{ height:100%; }
+    .kpi-label{
+      font-size:.88rem; color:var(--text-muted); min-height:38px; line-height:1.2; margin-bottom:.35rem;
+    }
+    .kpi-value{
+      font-size:clamp(18px,2.7vw,32px); font-weight:800; line-height:1.05; color:#111827;
+    }
+    .kpi-mini{ font-size:.8rem; color:#6b7280; margin-top:.25rem; }
+
+    .chart-container{ height:390px; position:relative; }
+    .chart-container-tall{ height:430px; position:relative; }
+
+    #map{
+      height:78vh; min-height:760px; border-radius:.85rem; overflow:hidden;
+    }
+    .compare-map{
+      height:520px; border-radius:.85rem; overflow:hidden; border:1px solid #e5e7eb;
+    }
+
+    .legend{
+      background:#fff; padding:.75rem .9rem; border-radius:.75rem; line-height:1.2;
+      box-shadow:0 4px 14px rgba(0,0,0,.18); border:1px solid rgba(0,0,0,.06);
+    }
+    #legend .legend-title{
+      font-size:.85rem; font-weight:700; margin-bottom:.4rem; color:#334155;
+    }
+    #legend div{ margin:4px 0; font-size:.84rem; color:#374151; }
+    #legend i{
+      display:inline-block; width:14px; height:14px; border-radius:50%;
+      margin-right:8px; vertical-align:middle; border:1px solid rgba(0,0,0,.15);
+    }
+
+    .map-info,.section-note{ font-size:.9rem; color:#6b7280; }
+    .risk-pill{
+      display:inline-block; border-radius:999px; padding:.28rem .7rem;
+      font-size:.78rem; font-weight:800; letter-spacing:.1px; color:#111827;
+      border:1px solid rgba(0,0,0,.08);
+    }
+
+    .leaflet-popup-content-wrapper{
+      border-radius:14px; box-shadow:0 8px 24px rgba(0,0,0,.18);
+    }
+    .leaflet-popup-content{ margin:12px 14px; }
+
+    .popup-irca{
+      min-width:300px; max-width:360px; font-family:Arial, sans-serif;
+    }
+    .popup-irca .popup-title{
+      font-size:1rem; font-weight:800; color:#1f2937; margin-bottom:4px;
+    }
+    .popup-irca .popup-subtitle{
+      font-size:.84rem; color:#6b7280; margin-bottom:10px;
+    }
+    .popup-irca .popup-section{
+      border-top:1px solid #e5e7eb; padding-top:8px; margin-top:8px;
+    }
+    .popup-irca .popup-row{
+      margin-bottom:4px; font-size:.86rem; color:#334155; line-height:1.3;
+    }
+    .popup-irca .popup-label{ font-weight:700; color:#374151; }
+    .popup-irca .popup-risk{
+      display:inline-block; padding:4px 9px; border-radius:999px; font-weight:800;
+      font-size:.76rem; border:1px solid rgba(0,0,0,.08);
+    }
+    .popup-irca .popup-grid{
+      display:grid; grid-template-columns:1fr 1fr; gap:6px 10px; margin-top:6px;
+    }
+    .popup-irca .popup-grid > div{
+      background:#f8fafc; border:1px solid #e5e7eb; border-radius:10px;
+      padding:6px 8px; font-size:.8rem;
+    }
+
+    .table thead th{ white-space:nowrap; }
+    .badge-map{ font-size:.95rem; padding:.45rem .75rem; border-radius:999px; }
+    .filter-label{ font-size:.88rem; font-weight:600; color:#475467; }
+
+    .map-year-help{
+      font-size:.87rem; color:#667085; background:#f8fafc; border:1px solid #e5e7eb;
+      border-radius:.7rem; padding:.65rem .8rem;
+    }
+
+    .compare-title{
+      font-size:1rem; font-weight:700; color:#1f2937; margin-bottom:.5rem;
+    }
+
+    .ts-control{
+      min-height:31px; padding-top:2px !important; padding-bottom:2px !important;
+    }
+
+    #mapResumenIRCA .risk-badge{
+      display:inline-block; margin:2px 4px; padding:4px 10px; border-radius:999px;
+      font-size:.82rem; font-weight:700; line-height:1.2; border:1px solid rgba(0,0,0,.08);
+    }
+
+    .custom-layer-panel{
+      position:absolute; top:12px; right:12px; z-index:500; width:290px; max-height:80%;
+      overflow:auto; background:#fff; border:1px solid rgba(0,0,0,.08);
+      border-radius:14px; box-shadow:0 8px 24px rgba(0,0,0,.18); padding:10px 12px;
+    }
+
+    .layer-panel-header{
+      font-weight:800; font-size:.95rem; color:#1f2937; margin-bottom:8px;
+    }
+
+    .custom-layer-panel details{
+      border-top:1px solid #e5e7eb; padding-top:8px; margin-top:8px;
+    }
+    .custom-layer-panel details:first-of-type{
+      border-top:none; padding-top:0; margin-top:0;
+    }
+    .custom-layer-panel summary{
+      cursor:pointer; font-weight:700; color:#334155; margin-bottom:6px; list-style:none;
+    }
+    .custom-layer-panel summary::-webkit-details-marker{ display:none; }
+    .custom-layer-panel label{
+      display:block; font-size:.88rem; color:#475467; margin:5px 0; cursor:pointer;
+    }
+    .custom-layer-panel input[type="checkbox"],
+    .custom-layer-panel input[type="radio"]{ margin-right:8px; }
+
+    .municipio-label div{
+      background: rgba(255,255,255,0.75);
+      color: #5b21b6;
+      border: 1px solid rgba(91,33,182,.18);
+      border-radius: 8px;
+      padding: 2px 6px;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+    }
+
+    .rio-label div{
+      background: rgba(255,255,255,0.72);
+      color: #0369a1;
+      border: 1px solid rgba(3,105,161,.18);
+      border-radius: 8px;
+      padding: 2px 6px;
+      font-size: 10px;
+      font-weight: 700;
+      white-space: nowrap;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+    }
+
+    .analytic-phase-title{
+      font-size:1rem; font-weight:800; color:#1f2937; margin-bottom:.4rem;
+    }
+    .analytic-mini{
+      color:#6b7280; font-size:.85rem;
+    }
+    .analytic-table{
+      font-size:.88rem;
+    }
+    .analytic-table th{
+      font-size:.78rem;
+      text-transform:uppercase;
+      color:#667085;
+      border-bottom:1px solid #e5e7eb;
+    }
+    .analytic-alert{
+      border-left:4px solid #ef4444;
+      background:#fff7f7;
+      border-radius:.75rem;
+      padding:.75rem .9rem;
+      margin-bottom:.6rem;
+      font-size:.88rem;
+    }
+    .analytic-placeholder{
+      border:1px dashed #d0d5dd;
+      border-radius:.8rem;
+      padding:1rem;
+      background:#fafafa;
+      color:#667085;
+      font-size:.9rem;
+      height:100%;
+    }
+
+    .analytic-method-box{
+      background:#f8fafc;
+      border:1px solid #e5e7eb;
+      border-radius:.85rem;
+      padding:.85rem .95rem;
+    }
+
+    .analytic-method-title{
+      font-size:.88rem;
+      font-weight:800;
+      color:#1f2937;
+      margin-bottom:.35rem;
+    }
+
+    .analytic-method-text{
+      font-size:.85rem;
+      color:#475467;
+      line-height:1.45;
+    }
+
+    .analytic-formula{
+      font-size:.83rem;
+      font-weight:700;
+      color:#344054;
+      background:#ffffff;
+      border:1px dashed #cbd5e1;
+      border-radius:.65rem;
+      padding:.45rem .6rem;
+    }
+
+    .analytic-method-list{
+      font-size:.82rem;
+      color:#667085;
+      line-height:1.4;
+    }
+
+    .analytic-method-list div{
+      margin-bottom:.2rem;
+    }
+
+    @media (max-width: 992px){
+      #map{ height:68vh; min-height:620px; }
+      .compare-map{ height:420px; }
+    }
+
+    @media (max-width: 768px){
+      .custom-layer-panel{ width:220px; max-height:65%; }
+    }
+
+    @media (max-width: 576px){
+      .board{ padding-left:10px; padding-right:10px; }
+      #map{ height:62vh; min-height:500px; }
+      .compare-map{ height:360px; }
+      .board-title{ font-size:1.35rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="gov-banner">
+    <div class="container d-flex align-items-center" style="height:100%;">
+      <img src="https://www.gov.co/assets/images/logo.png" alt="GOV.CO">
+    </div>
+  </div>
+
+  <main class="bg-shell">
+    <div class="board">
+
+      <header class="header-ues py-2 mb-3">
+        <div class="container-fluid px-3">
+          <div class="brand-strip">
+            <img src="https://www.uesvalle.gov.co/info/uesvalle/media/bloque1656.png" alt="UESVALLE" loading="lazy" class="img-fluid">
+          </div>
+        </div>
+      </header>
+
+      <section class="nav-card p-3 mb-3">
+        <nav class="navbar navbar-expand-lg bg-white rounded-4">
+          <div class="container-fluid d-flex flex-column align-items-center">
+            <div class="fw-bold mb-3 fs-5">Procesos</div>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navPrincipal">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse justify-content-center" id="navPrincipal">
+              <ul class="navbar-nav mb-2 mb-lg-0 nav-processes">
+                <li class="nav-item dropdown mx-2 my-1">
+                  <a class="nav-link dropdown-toggle process-btn active" href="#" role="button" data-bs-toggle="dropdown">
+                    1. Agua para consumo
+                  </a>
+                  <ul class="dropdown-menu">
+                    <li><a class="dropdown-item active" href="./ircas.html">1.1 IRCAS</a></li>
+                    <li><a class="dropdown-item" href="https://javiermarin7.github.io/UES_filtros/">1.2 Filtros</a></li>
+                  </ul>
+                </li>
+
+                <li class="nav-item dropdown mx-2 my-1">
+                  <a class="nav-link dropdown-toggle process-btn" href="#" role="button" data-bs-toggle="dropdown">
+                    2. Alimentos y medicamentos
+                  </a>
+                  <ul class="dropdown-menu"><li><a class="dropdown-item disabled" href="#">Próximamente</a></li></ul>
+                </li>
+
+                <li class="nav-item dropdown mx-2 my-1">
+                  <a class="nav-link dropdown-toggle process-btn" href="#" role="button" data-bs-toggle="dropdown">
+                    3. Zoonosis
+                  </a>
+                  <ul class="dropdown-menu"><li><a class="dropdown-item disabled" href="#">Próximamente</a></li></ul>
+                </li>
+
+                <li class="nav-item dropdown mx-2 my-1">
+                  <a class="nav-link dropdown-toggle process-btn" href="#" role="button" data-bs-toggle="dropdown">
+                    4. Establecimientos interés sanitario EIS
+                  </a>
+                  <ul class="dropdown-menu"><li><a class="dropdown-item disabled" href="#">Próximamente</a></li></ul>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </nav>
+      </section>
+
+      <section class="soft-card p-3 mb-3">
+        <div class="d-flex flex-column flex-lg-row align-items-lg-center">
+          <div class="me-auto">
+            <h1 class="board-title">Tablero – IRCAS UESVALLE</h1>
+            <div class="board-subtitle mt-1">Fuente: GitHub CSV</div>
+          </div>
+          <div class="mt-2 mt-lg-0">
+            <span id="lastUpdate" class="badge text-bg-success last-update-badge">Cargando…</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="soft-card p-3 mb-3">
+        <div class="row g-3 align-items-end">
+          <div class="col-12 col-sm-6 col-md-2">
+            <label class="form-label filter-label mb-1">Año</label>
+            <select id="fano" class="form-select form-select-sm"></select>
+          </div>
+
+          <div class="col-12 col-sm-6 col-md-3">
+            <label class="form-label filter-label mb-1">Municipio</label>
+            <select id="fmunicipio" class="form-select form-select-sm"><option value="">Todos</option></select>
+          </div>
+
+          <div class="col-12 col-sm-6 col-md-3">
+            <label class="form-label filter-label mb-1">ARO</label>
+            <select id="faro" class="form-select form-select-sm"><option value="">Todos</option></select>
+          </div>
+
+          <div class="col-12 col-sm-6 col-md-2">
+            <label class="form-label filter-label mb-1">Código IVC</label>
+            <select id="fcodivc" class="form-select form-select-sm"><option value="">Todos</option></select>
+          </div>
+
+          <div class="col-12 col-sm-6 col-md-2">
+            <label class="form-label filter-label mb-1">Tipo sistema tratamiento</label>
+            <select id="ftipoSistema" class="form-select form-select-sm"><option value="">Todos</option></select>
+          </div>
+
+          <div class="col-12 col-sm-6 col-md-3">
+            <label class="form-label filter-label mb-1">Algún tipo tratamiento</label>
+            <select id="falgunTrat" class="form-select form-select-sm"><option value="">Todos</option></select>
+          </div>
+
+          <div class="col-12 col-sm-6 col-md-4">
+            <label class="form-label filter-label mb-1">Persona prestadora</label>
+            <select id="fprestador" class="form-select form-select-sm"><option value="">Todos</option></select>
+          </div>
+
+          <div class="col-12 col-sm-6 col-md-3">
+            <label class="form-label filter-label mb-1">Forma organizativa</label>
+            <select id="fformaOrg" class="form-select form-select-sm"><option value="">Todos</option></select>
+          </div>
+
+          <div class="col-12 col-sm-6 col-md-2">
+            <label class="form-label filter-label mb-1">Punto toma 2025</label>
+            <select id="fpuntoToma" class="form-select form-select-sm"><option value="">Todos</option></select>
+          </div>
+
+          <div class="col-12 col-md-12 d-flex gap-2 justify-content-center pt-2 flex-wrap">
+            <button id="btnFiltrar" class="btn btn-primary btn-sm px-4">Aplicar filtros</button>
+            <button id="btnLimpiar" class="btn btn-outline-secondary btn-sm px-4">Limpiar</button>
+            <button id="btnCargar" class="btn btn-outline-primary btn-sm px-4">Refrescar datos</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="row g-3 mb-3">
+        <div class="col-12 col-sm-6 col-lg-2"><div class="kpi-card p-3"><div class="kpi-label">Sistemas</div><div id="kpiSistemas" class="kpi-value">–</div></div></div>
+        <div class="col-12 col-sm-6 col-lg-2"><div class="kpi-card p-3"><div class="kpi-label">IRCA promedio</div><div id="kpiPromedio" class="kpi-value">–</div><div class="kpi-mini">Promedio histórico filtrado</div></div></div>
+        <div class="col-12 col-sm-6 col-lg-2"><div class="kpi-card p-3"><div class="kpi-label">IRCA año seleccionado</div><div id="kpiIRCAActual" class="kpi-value">–</div><div class="kpi-mini">Promedio del año activo</div></div></div>
+        <div class="col-12 col-sm-6 col-lg-3"><div class="kpi-card p-3"><div class="kpi-label">Población</div><div id="kpiPoblacion" class="kpi-value">–</div><div class="kpi-mini">Suma de registros filtrados</div></div></div>
+        <div class="col-12 col-sm-6 col-lg-3"><div class="kpi-card p-3"><div class="kpi-label">Suscriptores</div><div id="kpiSuscriptores" class="kpi-value">–</div><div class="kpi-mini">Suma de registros filtrados</div></div></div>
+      </section>
+
+      <section class="row g-3 mb-3">
+        <div class="col-12">
+          <div class="soft-card p-3">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+              <h5 class="mb-0">KPIs históricos de IRCA</h5>
+              <div class="section-note">Promedio por año con los filtros aplicados</div>
+            </div>
+            <div class="row g-3">
+              <div class="col-6 col-md-4 col-lg-2"><div class="kpi-card p-3"><div class="kpi-label">IRCA 2020</div><div id="kpiIRCA2020" class="kpi-value">–</div></div></div>
+              <div class="col-6 col-md-4 col-lg-2"><div class="kpi-card p-3"><div class="kpi-label">IRCA 2021</div><div id="kpiIRCA2021" class="kpi-value">–</div></div></div>
+              <div class="col-6 col-md-4 col-lg-2"><div class="kpi-card p-3"><div class="kpi-label">IRCA 2022</div><div id="kpiIRCA2022" class="kpi-value">–</div></div></div>
+              <div class="col-6 col-md-4 col-lg-2"><div class="kpi-card p-3"><div class="kpi-label">IRCA 2023</div><div id="kpiIRCA2023" class="kpi-value">–</div></div></div>
+              <div class="col-6 col-md-4 col-lg-2"><div class="kpi-card p-3"><div class="kpi-label">IRCA 2024</div><div id="kpiIRCA2024" class="kpi-value">–</div></div></div>
+              <div class="col-6 col-md-4 col-lg-2"><div class="kpi-card p-3"><div class="kpi-label">IRCA 2025</div><div id="kpiIRCA2025" class="kpi-value">–</div></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="row g-3 mb-3">
+        <div class="col-6 col-md-2"><div class="kpi-card p-3 text-center"><div class="risk-pill" style="background:#00b050; color:#fff;">SIN RIESGO</div><div id="kpiSinRiesgo" class="kpi-value mt-2">0%</div></div></div>
+        <div class="col-6 col-md-2"><div class="kpi-card p-3 text-center"><div class="risk-pill" style="background:#c6e0b4;">BAJO</div><div id="kpiBajo" class="kpi-value mt-2">0%</div></div></div>
+        <div class="col-6 col-md-2"><div class="kpi-card p-3 text-center"><div class="risk-pill" style="background:#ffff00;">MEDIO</div><div id="kpiMedio" class="kpi-value mt-2">0%</div></div></div>
+        <div class="col-6 col-md-2"><div class="kpi-card p-3 text-center"><div class="risk-pill" style="background:#ffc000;">ALTO</div><div id="kpiAlto" class="kpi-value mt-2">0%</div></div></div>
+        <div class="col-12 col-md-4"><div class="kpi-card p-3 text-center"><div class="risk-pill" style="background:#ff0000; color:#fff;">INVIABLE SANITARIAMENTE</div><div id="kpiInviable" class="kpi-value mt-2">0%</div></div></div>
+      </section>
+
+      <section class="soft-card p-3 mb-4">
+        <div class="d-flex align-items-start justify-content-between flex-wrap gap-2 mb-2">
+          <div>
+            <h5 class="mb-1">Mapa de IRCAS</h5>
+            <div class="map-info">Activa capas anuales, cambia mapa base y consulta detalle por sistema.</div>
+          </div>
+          <span id="mapCount" class="badge text-bg-primary badge-map">0 sistemas</span>
+        </div>
+
+        <div class="map-year-help mb-3">
+          El mapa principal incluye:
+          <b>IRCAS 2020, 2021, 2022, 2023, 2024 y 2025</b>, una capa analítica de
+          <b>Heatmap de riesgo poblacional</b> y un grupo de capas <b>Territorial</b>.
+        </div>
+
+        <div class="position-relative">
+          <div id="map"></div>
+
+          <div id="layerPanel" class="custom-layer-panel">
+            <div class="layer-panel-header">Capas del mapa</div>
+
+            <details open>
+              <summary>Mapas base</summary>
+              <label><input type="radio" name="basemap" value="cartoLight" checked> Claro CARTO</label>
+              <label><input type="radio" name="basemap" value="esriTopo"> Topográfico Esri</label>
+              <label><input type="radio" name="basemap" value="esriImagery"> Satélite Esri</label>
+              <label><input type="radio" name="basemap" value="osm"> OpenStreetMap</label>
+            </details>
+
+            <details open>
+              <summary>IRCAS</summary>
+              <label><input type="checkbox" data-layer="ircas2020"> 2020</label>
+              <label><input type="checkbox" data-layer="ircas2021"> 2021</label>
+              <label><input type="checkbox" data-layer="ircas2022"> 2022</label>
+              <label><input type="checkbox" data-layer="ircas2023"> 2023</label>
+              <label><input type="checkbox" data-layer="ircas2024"> 2024</label>
+              <label><input type="checkbox" data-layer="ircas2025" checked> 2025</label>
+            </details>
+
+            <details>
+              <summary>Analítica</summary>
+              <label><input type="checkbox" data-layer="heatmap"> Heatmap riesgo poblacional</label>
+            </details>
+
+            <details>
+              <summary>Territorial</summary>
+              <label><input type="checkbox" data-layer="municipiosValle"> Municipios Valle</label>
+              <label><input type="checkbox" data-layer="municipiosValleLabels" checked> Etiquetas municipios Valle</label>
+              <label><input type="checkbox" data-layer="veredasValle"> Veredas Valle</label>
+              <label><input type="checkbox" data-layer="centrosPoblados"> Centros poblados</label>
+              <label><input type="checkbox" data-layer="viasPrincipales"> Vías principales</label>
+              <label><input type="checkbox" data-layer="rios"> Ríos</label>
+              <label><input type="checkbox" data-layer="riosLabels"> Etiquetas ríos</label>
+              <label><input type="checkbox" data-layer="valleContorno"> Valle contorno</label>
+              <label><input type="checkbox" data-layer="municipiosUES"> Municipios UES</label>
+              <label><input type="checkbox" data-layer="turbiedad"> Turbiedad</label>
+            </details>
+          </div>
+
+          <div id="legend" class="legend position-absolute" style="bottom:12px; left:12px; z-index:401;"></div>
+        </div>
+
+        <div id="mapResumenIRCA" class="mt-3 p-2 text-center bg-white rounded shadow-sm"
+             style="border:1px solid #eee; font-size:0.9rem;"></div>
+      </section>
+
+      <section class="soft-card p-3 mb-4">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+          <div>
+            <h5 class="mb-1">Comparación sincronizada 2020 vs 2025</h5>
+            <div class="section-note">Ambos mapas se desplazan y hacen zoom al mismo tiempo para comparar visualmente la evolución.</div>
+          </div>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-12 col-xl-6">
+            <div class="compare-title">IRCA 2020</div>
+            <div id="mapCompare2020" class="compare-map"></div>
+          </div>
+          <div class="col-12 col-xl-6">
+            <div class="compare-title">IRCA 2025</div>
+            <div id="mapCompare2025" class="compare-map"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="soft-card p-3 mb-4">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+          <div>
+            <h5 class="mb-1">Analítica de priorización y seguimiento</h5>
+            <div class="section-note">Bloque analítico posterior al componente espacial. Fase 1 implementada; Fases 2 y 3 listas para crecer.</div>
+          </div>
+        </div>
+
+        <div class="row g-4 mb-3">
+          <div class="col-12 col-xl-4">
+            <div class="analytic-card p-3 h-100">
+              <div class="analytic-phase-title">Fase 1 · Ejecutiva</div>
+              <div class="analytic-mini mb-3">Priorización, población expuesta, alertas y rankings.</div>
+
+              <div class="row g-3 mb-3">
+                <div class="col-6">
+                  <div class="kpi-card p-3">
+                    <div class="kpi-label">Sistemas críticos</div>
+                    <div id="anaKpiCriticos" class="kpi-value">–</div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="kpi-card p-3">
+                    <div class="kpi-label">Población riesgo ≥ medio</div>
+                    <div id="anaKpiPobRiesgo" class="kpi-value">–</div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="kpi-card p-3">
+                    <div class="kpi-label">Población alto/inviable</div>
+                    <div id="anaKpiPobAlta" class="kpi-value">–</div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="kpi-card p-3">
+                    <div class="kpi-label">Sistemas sin tratamiento</div>
+                    <div id="anaKpiSinTrat" class="kpi-value">–</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="analytic-phase-title mb-2">Alertas automáticas</div>
+              <div id="anaAlertas"></div>
+            </div>
+          </div>
+
+          <div class="col-12 col-xl-4">
+            <div class="analytic-card p-3 h-100">
+              <div class="analytic-phase-title">Top 10 sistemas críticos</div>
+              <div class="analytic-mini mb-2">Ranking de sistemas priorizados con base en riesgo sanitario, población y condición de tratamiento.</div>
+
+              <div class="analytic-method-box mb-3">
+                <div class="analytic-method-title">¿Cómo se calcula?</div>
+                <div class="analytic-method-text">
+                  El indicador de prioridad del sistema se construye combinando:
+                  <b>nivel de riesgo IRCA del año activo</b>,
+                  <b>población abastecida</b> y
+                  <b>condición de tratamiento</b>.
+                </div>
+                <div class="analytic-formula mt-2">
+                  Prioridad = factor de riesgo × log10(población + 1) × factor de tratamiento
+                </div>
+                <div class="analytic-method-list mt-2">
+                  <div><b>Factor de riesgo:</b> Sin riesgo = 0, Bajo = 1, Medio = 2, Alto = 3, Inviable = 4.</div>
+                  <div><b>Factor de tratamiento:</b> aumenta cuando el sistema no reporta tratamiento.</div>
+                  <div><b>Interpretación:</b> a mayor valor, mayor prioridad de atención.</div>
+                </div>
+              </div>
+
+              <div class="table-responsive">
+                <table class="table table-sm analytic-table">
+                  <thead>
+                    <tr>
+                      <th>Prestador</th>
+                      <th>Municipio</th>
+                      <th>IRCA</th>
+                      <th>Prioridad</th>
+                    </tr>
+                  </thead>
+                  <tbody id="anaTopSistemas"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-xl-4">
+            <div class="analytic-card p-3 h-100">
+              <div class="analytic-phase-title">Top 10 municipios críticos</div>
+              <div class="analytic-mini mb-2">Ranking municipal a partir de la criticidad agregada de sus sistemas y la población expuesta.</div>
+
+              <div class="analytic-method-box mb-3">
+                <div class="analytic-method-title">¿Cómo se calcula?</div>
+                <div class="analytic-method-text">
+                  El indicador municipal consolida la situación del municipio combinando:
+                  <b>promedio IRCA</b>,
+                  <b>población expuesta en riesgo medio o superior</b> y
+                  <b>suma de prioridades de los sistemas filtrados</b>.
+                </div>
+                <div class="analytic-formula mt-2">
+                  Score municipal = suma de prioridades de sistemas + presión poblacional en riesgo
+                </div>
+                <div class="analytic-method-list mt-2">
+                  <div><b>IRCA promedio:</b> describe el comportamiento general del municipio.</div>
+                  <div><b>Población en riesgo:</b> cuantifica el impacto potencial sobre la población abastecida.</div>
+                  <div><b>Interpretación:</b> a mayor score, mayor criticidad municipal.</div>
+                </div>
+              </div>
+
+              <div class="table-responsive">
+                <table class="table table-sm analytic-table">
+                  <thead>
+                    <tr>
+                      <th>Municipio</th>
+                      <th>IRCA prom.</th>
+                      <th>Pob. riesgo</th>
+                      <th>Score</th>
+                    </tr>
+                  </thead>
+                  <tbody id="anaTopMunicipios"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-4">
+          <div class="col-12 col-lg-6">
+            <div class="analytic-card p-3 h-100">
+              <div class="analytic-phase-title">Fase 2 · Territorial</div>
+              <div class="analytic-mini mb-3">Preparada para cruces con capas territoriales.</div>
+              <div class="analytic-placeholder">
+                Este bloque está listo para crecer con analítica espacial, como:
+                cruce con sedes educativas, centros poblados, ríos, vías principales,
+                veredas y fichas territoriales por municipio.
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-6">
+            <div class="analytic-card p-3 h-100">
+              <div class="analytic-phase-title">Fase 3 · Predictiva y seguimiento</div>
+              <div class="analytic-mini mb-3">Preparada para tendencia y proyección.</div>
+              <div class="analytic-placeholder">
+                Este bloque está listo para incorporar:
+                tendencia por sistema, mejora/empeora/estable, cobertura del dato,
+                proyección simple del IRCA y seguimiento institucional de intervenciones.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="row g-4 mb-4">
+        <div class="col-12">
+          <div class="chart-card p-3">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+              <h5 class="mb-0">Tendencia histórica IRCA 2020–2025</h5>
+              <div class="section-note">Haz clic en el gráfico para filtrar por año. Repite el clic para quitar el filtro.</div>
+            </div>
+            <div class="chart-container">
+              <canvas id="chartHistorico"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-xl-7">
+          <div class="chart-card p-3">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+              <h5 class="mb-0">IRCA promedio por municipio</h5>
+              <div class="section-note">Haz clic en una barra para filtrar por municipio.</div>
+            </div>
+            <div class="chart-container-tall">
+              <canvas id="chartMunicipio"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-xl-5">
+          <div class="chart-card p-3">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+              <h5 class="mb-0">Distribución por nivel de riesgo</h5>
+              <div class="section-note">Haz clic en un nivel para filtrar por riesgo.</div>
+            </div>
+            <div class="chart-container-tall">
+              <canvas id="chartRiesgo"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="soft-card p-3">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+          <h5 class="mb-0">Tabla de detalle IRCAS</h5>
+          <div class="section-note">La tabla respeta los filtros activos y permite exportar</div>
+        </div>
+        <div class="table-responsive">
+          <table id="tbl" class="table table-striped table-hover w-100"></table>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/esri-leaflet@3.0.14/dist/esri-leaflet.js"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+  <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+  <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap5.min.js"></script>
+  <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+  <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+
+  <script>
+    Chart.register(ChartDataLabels);
+
+    const CSV_URL = "https://raw.githubusercontent.com/JavierMarin7/UES_filtros/refs/heads/main/IRCAS.csv";
+
+    const RISK_COLORS = {
+      "SIN RIESGO": "#00b050",
+      "BAJO": "#c6e0b4",
+      "MEDIO": "#ffff00",
+      "ALTO": "#ffc000",
+      "INVIABLE SANITARIAMENTE": "#ff0000",
+      "SIN DATO": "#6c757d"
+    };
+
+    const RISK_FACTORS = {
+      "SIN RIESGO": 0,
+      "BAJO": 1,
+      "MEDIO": 2,
+      "ALTO": 3,
+      "INVIABLE SANITARIAMENTE": 4,
+      "SIN DATO": 0.5
+    };
+
+    const FILTER_IDS = [
+      "fano","fmunicipio","faro","fcodivc","ftipoSistema",
+      "falgunTrat","fprestador","fformaOrg","fpuntoToma"
+    ];
+
+    let RAW = [];
+    let LIST = [];
+    let DT = null;
+    let charts = {};
+    let selectInstances = {};
+    let PANEL_LAYERS = {};
+    let BASEMAPS = {};
+    let currentBasemap = null;
+    let MUNICIPIOS_VALLE_LABELS = null;
+    let RIOS_LABELS = null;
+
+    let chartRiskFilter = "";
+    let chartMunicipioFilter = "";
+    let chartYearFilter = "";
+
+    let MAP;
+    let YEAR_LAYERS = {};
+
+    let MAP_COMPARE_2020;
+    let MAP_COMPARE_2025;
+    let compareLayer2020;
+    let compareLayer2025;
+    let syncLock = false;
+
+    function norm(v){
+      return (v == null ? "" : String(v).trim())
+        .replaceAll("Á","A").replaceAll("É","E").replaceAll("Í","I")
+        .replaceAll("Ó","O").replaceAll("Ú","U")
+        .replaceAll("á","a").replaceAll("é","e").replaceAll("í","i")
+        .replaceAll("ó","o").replaceAll("ú","u")
+        .toUpperCase();
+    }
+
+    function uniq(arr){
+      return [...new Set(arr.filter(v => v != null && String(v).trim() !== ""))];
+    }
+
+    function toNumber(v){
+      if(v == null || v === "") return null;
+      const n = Number(String(v).replace(",", "."));
+      return Number.isFinite(n) ? n : null;
+    }
+
+    function pct(part, total){
+      return total ? Math.round((part / total) * 1000) / 10 : 0;
+    }
+
+    function avg(arr){
+      const valid = arr.filter(v => Number.isFinite(v));
+      return valid.length ? valid.reduce((a,b)=>a+b,0) / valid.length : 0;
+    }
+
+    function riskColor(risk){
+      return RISK_COLORS[norm(risk)] || RISK_COLORS["SIN DATO"];
+    }
+
+    function riskFactor(risk){
+      return RISK_FACTORS[norm(risk)] ?? 0;
+    }
+
+    function getIRCAField(year){ return `IRCA_${year}`; }
+
+    function getRiskField(year){
+      if(year === "2024") return "Nivel_de_Riesgo_2024";
+      if(year === "2025") return "Nivel_Riesgo_2025";
+      return `Nivel de Riesgo_${year}`;
+    }
+
+    function getFechaField(year){
+      if(year === "2023") return "FECHA_IRCA_2023";
+      if(year === "2024") return "Fecha_IRCA_2024";
+      if(year === "2025") return "Fecha_Ultimo_IRCA_2025";
+      return `Fecha ultimo IRCA_${year}`;
+    }
+
+    function fillSelect(id, values, allLabel = "Todos"){
+      const el = document.getElementById(id);
+      el.innerHTML = `<option value="">${allLabel}</option>` +
+        values.map(v => `<option value="${String(v).replaceAll('"','&quot;')}">${v}</option>`).join("");
+    }
+
+    function parseRows(rows){
+      return rows.map(r => ({
+        CODIGO_SISTEMA: r["CODIGO_SISTEMA"] ?? "",
+        CODIGO_IVC: r["CODIGO IVC2"] ?? "",
+        MUNICIPIO: r["MUNICIPIO"] ?? "",
+        ARO: r["ARO"] ?? "",
+        PERSONA_PRESTADORA: r["Persona Prestadora"] ?? "",
+        FORMA_ORGANIZATIVA: r["Forma_organizativa"] ?? "",
+        TIPO_SISTEMA_TRATAMIENTO: r["TIPO_SISTEMA_TRATAMIENTO"] ?? "",
+        ALGUN_TIPO_TRATAMIENTO: r["ALGUN_TIPO_TRATAMIENTO"] ?? "",
+        LOCALIDADES_ABASTECIDAS: r["LOCALIDADES ABASTECIDAS"] ?? "",
+        SUSCRIPTORES: toNumber(r["SUSCRIPTORES"]),
+        POBLACION: toNumber(r["POBLACION"]),
+        PUNTO_TOMA_2025: r["Punto_Toma_2025"] ?? "",
+        LATITUD: toNumber(r["Latitud_X"]),
+        LONGITUD: toNumber(r["Longitud_Y"]),
+        IRCA_2020: toNumber(r["IRCA_2020"]),
+        IRCA_2021: toNumber(r["IRCA_2021"]),
+        IRCA_2022: toNumber(r["IRCA_2022"]),
+        IRCA_2023: toNumber(r["IRCA_2023"]),
+        IRCA_2024: toNumber(r["IRCA_2024"]),
+        IRCA_2025: toNumber(r["IRCA_2025"]),
+        "Nivel de Riesgo_2020": r["Nivel de Riesgo_2020"] ?? "",
+        "Nivel de Riesgo_2021": r["Nivel de Riesgo_2021"] ?? "",
+        "Nivel de Riesgo_2022": r["Nivel de Riesgo_2022"] ?? "",
+        "Nivel de Riesgo_2023": r["Nivel de Riesgo_2023"] ?? "",
+        "Nivel_de_Riesgo_2024": r["Nivel_de_Riesgo_2024"] ?? "",
+        "Nivel_Riesgo_2025": r["Nivel_Riesgo_2025"] ?? "",
+        "Fecha ultimo IRCA_2020": r["Fecha ultimo IRCA_2020"] ?? "",
+        "Fecha ultimo IRCA_2021": r["Fecha ultimo IRCA_2021"] ?? "",
+        "Fecha ultimo IRCA_2022": r["Fecha ultimo IRCA_2022"] ?? "",
+        "FECHA_IRCA_2023": r["FECHA_IRCA_2023"] ?? "",
+        "Fecha_IRCA_2024": r["Fecha_IRCA_2024"] ?? "",
+        "Fecha_Ultimo_IRCA_2025": r["Fecha_Ultimo_IRCA_2025"] ?? "",
+        IRCA_Promedio: toNumber(r["IRCA_Promedio"])
+      }));
+    }
+
+    async function fetchCSV(){
+      return new Promise((resolve, reject) => {
+        Papa.parse(CSV_URL + "?_=" + Date.now(), {
+          download: true, header: true, skipEmptyLines: true, complete: resolve, error: reject
+        });
+      });
+    }
+
+    function initSearchableSelects() {
+      FILTER_IDS.forEach(id => {
+        if (selectInstances[id]) selectInstances[id].destroy();
+        const el = document.getElementById(id);
+        selectInstances[id] = new TomSelect(el, {
+          create: false,
+          allowEmptyOption: true,
+          maxOptions: 5000,
+          sortField: { field: "text", direction: "asc" },
+          searchField: ["text"],
+          placeholder: "Buscar o seleccionar..."
+        });
+        el.tomselect.on("change", () => { cascadeFilterOptions(); });
+      });
+    }
+
+    function fillFilters(data){
+      fillSelect("fano", ["2025","2024","2023","2022","2021","2020"], "Seleccione");
+      document.getElementById("fano").value = "2025";
+      fillSelect("fmunicipio", uniq(data.map(d => d.MUNICIPIO)).sort((a,b)=>a.localeCompare(b,'es')));
+      fillSelect("faro", uniq(data.map(d => d.ARO)).sort((a,b)=>a.localeCompare(b,'es')));
+      fillSelect("fcodivc", uniq(data.map(d => d.CODIGO_IVC)).sort((a,b)=>String(a).localeCompare(String(b),'es')));
+      fillSelect("ftipoSistema", uniq(data.map(d => d.TIPO_SISTEMA_TRATAMIENTO)).sort((a,b)=>a.localeCompare(b,'es')));
+      fillSelect("falgunTrat", uniq(data.map(d => String(d.ALGUN_TIPO_TRATAMIENTO))).sort((a,b)=>a.localeCompare(b,'es')));
+      fillSelect("fprestador", uniq(data.map(d => d.PERSONA_PRESTADORA)).sort((a,b)=>a.localeCompare(b,'es')));
+      fillSelect("fformaOrg", uniq(data.map(d => d.FORMA_ORGANIZATIVA)).sort((a,b)=>a.localeCompare(b,'es')));
+      fillSelect("fpuntoToma", uniq(data.map(d => d.PUNTO_TOMA_2025)).sort((a,b)=>a.localeCompare(b,'es')));
+      initSearchableSelects();
+    }
+
+    function getCurrentFilterValues() {
+      const values = {};
+      FILTER_IDS.forEach(id => {
+        const el = document.getElementById(id);
+        values[id] = el ? el.value : "";
+      });
+      return values;
+    }
+
+    function getFilteredDataExcluding(targetId) {
+      const values = getCurrentFilterValues();
+      return RAW.filter(d => {
+        if (targetId !== "fmunicipio" && values.fmunicipio && d.MUNICIPIO !== values.fmunicipio) return false;
+        if (targetId !== "faro" && values.faro && d.ARO !== values.faro) return false;
+        if (targetId !== "fcodivc" && values.fcodivc && String(d.CODIGO_IVC) !== values.fcodivc) return false;
+        if (targetId !== "ftipoSistema" && values.ftipoSistema && d.TIPO_SISTEMA_TRATAMIENTO !== values.ftipoSistema) return false;
+        if (targetId !== "falgunTrat" && values.falgunTrat && String(d.ALGUN_TIPO_TRATAMIENTO) !== values.falgunTrat) return false;
+        if (targetId !== "fprestador" && values.fprestador && d.PERSONA_PRESTADORA !== values.fprestador) return false;
+        if (targetId !== "fformaOrg" && values.fformaOrg && d.FORMA_ORGANIZATIVA !== values.fformaOrg) return false;
+        if (targetId !== "fpuntoToma" && values.fpuntoToma && d.PUNTO_TOMA_2025 !== values.fpuntoToma) return false;
+        return true;
+      });
+    }
+
+    function refreshSingleSelect(id, values, keepValue = true, allLabel = "Todos") {
+      const el = document.getElementById(id);
+      const currentValue = keepValue ? el.value : "";
+
+      if (selectInstances[id]) selectInstances[id].destroy();
+
+      fillSelect(id, values, allLabel);
+
+      if (currentValue && values.includes(currentValue)) {
+        document.getElementById(id).value = currentValue;
+      } else if (id === "fano" && currentValue) {
+        document.getElementById(id).value = currentValue;
+      } else {
+        document.getElementById(id).value = "";
+      }
+
+      selectInstances[id] = new TomSelect(document.getElementById(id), {
+        create: false,
+        allowEmptyOption: true,
+        maxOptions: 5000,
+        sortField: { field: "text", direction: "asc" },
+        searchField: ["text"],
+        placeholder: "Buscar o seleccionar..."
+      });
+
+      document.getElementById(id).tomselect.on("change", () => { cascadeFilterOptions(); });
+    }
+
+    function cascadeFilterOptions() {
+      const dataMunicipio = getFilteredDataExcluding("fmunicipio");
+      const dataARO = getFilteredDataExcluding("faro");
+      const dataCodigo = getFilteredDataExcluding("fcodivc");
+      const dataTipo = getFilteredDataExcluding("ftipoSistema");
+      const dataAlguno = getFilteredDataExcluding("falgunTrat");
+      const dataPrestador = getFilteredDataExcluding("fprestador");
+      const dataForma = getFilteredDataExcluding("fformaOrg");
+      const dataPunto = getFilteredDataExcluding("fpuntoToma");
+
+      refreshSingleSelect("fmunicipio", uniq(dataMunicipio.map(d => d.MUNICIPIO)).sort((a,b)=>a.localeCompare(b,'es')));
+      refreshSingleSelect("faro", uniq(dataARO.map(d => d.ARO)).sort((a,b)=>a.localeCompare(b,'es')));
+      refreshSingleSelect("fcodivc", uniq(dataCodigo.map(d => d.CODIGO_IVC)).sort((a,b)=>String(a).localeCompare(String(b),'es')));
+      refreshSingleSelect("ftipoSistema", uniq(dataTipo.map(d => d.TIPO_SISTEMA_TRATAMIENTO)).sort((a,b)=>a.localeCompare(b,'es')));
+      refreshSingleSelect("falgunTrat", uniq(dataAlguno.map(d => String(d.ALGUN_TIPO_TRATAMIENTO))).sort((a,b)=>a.localeCompare(b,'es')));
+      refreshSingleSelect("fprestador", uniq(dataPrestador.map(d => d.PERSONA_PRESTADORA)).sort((a,b)=>a.localeCompare(b,'es')));
+      refreshSingleSelect("fformaOrg", uniq(dataForma.map(d => d.FORMA_ORGANIZATIVA)).sort((a,b)=>a.localeCompare(b,'es')));
+      refreshSingleSelect("fpuntoToma", uniq(dataPunto.map(d => d.PUNTO_TOMA_2025)).sort((a,b)=>a.localeCompare(b,'es')));
+
+      if (selectInstances["fano"]) {
+        const selectedYear = document.getElementById("fano").value || "2025";
+        selectInstances["fano"].destroy();
+        fillSelect("fano", ["2025","2024","2023","2022","2021","2020"], "Seleccione");
+        document.getElementById("fano").value = selectedYear;
+        selectInstances["fano"] = new TomSelect(document.getElementById("fano"), {
+          create: false, allowEmptyOption: true, searchField: ["text"], placeholder: "Buscar o seleccionar..."
+        });
+        document.getElementById("fano").tomselect.on("change", () => { cascadeFilterOptions(); });
+      }
+    }
+
+    function popupRiskTextColor(riesgo){
+      return norm(riesgo) === "INVIABLE SANITARIAMENTE" || norm(riesgo) === "SIN RIESGO" ? "#fff" : "#111";
+    }
+
+    function buildPopupHTML(d, year, riesgo, color, irca, fecha){
+      return `
+        <div class="popup-irca">
+          <div class="popup-title">${(d.PERSONA_PRESTADORA || "SIN PRESTADOR").toUpperCase()}</div>
+          <div class="popup-subtitle">${d.MUNICIPIO || "-"}</div>
+
+          <div class="popup-row"><span class="popup-label">ARO:</span> ${d.ARO || "-"}</div>
+          <div class="popup-row"><span class="popup-label">Código sistema:</span> ${d.CODIGO_SISTEMA || "-"}</div>
+          <div class="popup-row"><span class="popup-label">Código IVC:</span> ${d.CODIGO_IVC || "-"}</div>
+
+          <div class="popup-section">
+            <div class="popup-row"><span class="popup-label">Tipo sistema tratamiento:</span> ${d.TIPO_SISTEMA_TRATAMIENTO || "-"}</div>
+            <div class="popup-row"><span class="popup-label">Localidades abastecidas:</span> ${d.LOCALIDADES_ABASTECIDAS || "-"}</div>
+            <div class="popup-row"><span class="popup-label">Forma organizativa:</span> ${d.FORMA_ORGANIZATIVA || "-"}</div>
+            <div class="popup-row"><span class="popup-label">Punto toma 2025:</span> ${d.PUNTO_TOMA_2025 || "-"}</div>
+          </div>
+
+          <div class="popup-section">
+            <div class="popup-row">
+              <span class="popup-label">Nivel de riesgo ${year}:</span>
+              <span class="popup-risk" style="background:${color}; color:${popupRiskTextColor(riesgo)};">${riesgo || "-"}</span>
+            </div>
+            <div class="popup-row"><span class="popup-label">Fecha último IRCA:</span> ${fecha || "-"}</div>
+            <div class="popup-row"><span class="popup-label">Valor IRCA:</span> ${irca ?? "-"}</div>
+          </div>
+
+          <div class="popup-section">
+            <div class="popup-row"><span class="popup-label">Serie histórica IRCA</span></div>
+            <div class="popup-grid">
+              <div><b>2020:</b> ${d.IRCA_2020 ?? "-"}<br><span>${d["Nivel de Riesgo_2020"] || "-"}</span></div>
+              <div><b>2021:</b> ${d.IRCA_2021 ?? "-"}<br><span>${d["Nivel de Riesgo_2021"] || "-"}</span></div>
+              <div><b>2022:</b> ${d.IRCA_2022 ?? "-"}<br><span>${d["Nivel de Riesgo_2022"] || "-"}</span></div>
+              <div><b>2023:</b> ${d.IRCA_2023 ?? "-"}<br><span>${d["Nivel de Riesgo_2023"] || "-"}</span></div>
+              <div><b>2024:</b> ${d.IRCA_2024 ?? "-"}<br><span>${d["Nivel_de_Riesgo_2024"] || "-"}</span></div>
+              <div><b>2025:</b> ${d.IRCA_2025 ?? "-"}<br><span>${d["Nivel_Riesgo_2025"] || "-"}</span></div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderMunicipiosValleLabels(layerRef){
+      if(!MUNICIPIOS_VALLE_LABELS) return;
+      MUNICIPIOS_VALLE_LABELS.clearLayers();
+
+      layerRef.eachFeature(function(featureLayer){
+        const p = featureLayer.feature?.properties || {};
+        const nombre = p.MUNICIPIO || p.NOM_MUN || p.NOMBRE || p.MPIO || p.NAME || "";
+        if(!nombre) return;
+
+        const center = featureLayer.getBounds ? featureLayer.getBounds().getCenter() : null;
+        if(!center) return;
+
+        const label = L.marker(center, {
+          interactive: false,
+          icon: L.divIcon({
+            className: 'municipio-label',
+            html: `<div>${nombre}</div>`
+          })
+        });
+
+        MUNICIPIOS_VALLE_LABELS.addLayer(label);
+      });
+    }
+
+    function renderRiosLabels(layerRef){
+      if(!RIOS_LABELS) return;
+
+      RIOS_LABELS.clearLayers();
+
+      layerRef.eachFeature(function(featureLayer){
+        const p = featureLayer.feature?.properties || {};
+        const nombre = p.NOM1_DRENAJE || p.NOMBRE || p.RIO || "";
+
+        if(!nombre) return;
+
+        let center = null;
+        if (featureLayer.getBounds) {
+          center = featureLayer.getBounds().getCenter();
+        }
+        if(!center) return;
+
+        const label = L.marker(center, {
+          interactive: false,
+          icon: L.divIcon({
+            className: 'rio-label',
+            html: `<div>${nombre}</div>`
+          })
+        });
+
+        RIOS_LABELS.addLayer(label);
+      });
+    }
+
+    function initMainMap(){
+      MAP = L.map("map", { zoomControl: true }).setView([3.9, -76.3], 8);
+
+      const osm = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19, attribution: "&copy; OpenStreetMap"
+      });
+
+      const esriWorldImagery = L.tileLayer(
+        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+        { maxZoom: 19, attribution: "Tiles &copy; Esri" }
+      );
+
+      const esriTopo = L.tileLayer(
+        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
+        { maxZoom: 19, attribution: "Tiles &copy; Esri" }
+      );
+
+      const cartoLight = L.tileLayer(
+        "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+        { maxZoom: 20, attribution: "&copy; CARTO" }
+      );
+
+      BASEMAPS = { osm, esriImagery: esriWorldImagery, esriTopo, cartoLight };
+      currentBasemap = cartoLight;
+      currentBasemap.addTo(MAP);
+
+      const URL_MUNICIPIOS_UES = "https://services5.arcgis.com/l23kE3b7uPnZIuaB/arcgis/rest/services/Municipio_UES/FeatureServer/0";
+      const URL_MUNICIPIO_VALLE = "https://services5.arcgis.com/l23kE3b7uPnZIuaB/arcgis/rest/services/CARTOGRAFIA_BASE/FeatureServer/2";
+      const URL_VEREDAS_VALLE = "https://services5.arcgis.com/l23kE3b7uPnZIuaB/arcgis/rest/services/CARTOGRAFIA_BASE/FeatureServer/4";
+      const URL_CENTROS_POBLADOS = "https://services5.arcgis.com/l23kE3b7uPnZIuaB/arcgis/rest/services/CARTOGRAFIA_BASE/FeatureServer/1";
+      const URL_TURBIEDAD = "https://services5.arcgis.com/l23kE3b7uPnZIuaB/arcgis/rest/services/Turbiedad/FeatureServer/1";
+      const URL_VIAS_PRINCIPALES = "https://services5.arcgis.com/l23kE3b7uPnZIuaB/arcgis/rest/services/Sedes_Educativas_WFL1/FeatureServer/3";
+      const URL_RIOS = "https://services5.arcgis.com/l23kE3b7uPnZIuaB/arcgis/rest/services/Sedes_Educativas_WFL1/FeatureServer/4";
+      const URL_VALLE_CONTORNO = "https://services5.arcgis.com/l23kE3b7uPnZIuaB/arcgis/rest/services/Sedes_Educativas_WFL1/FeatureServer/8";
+
+      const municipiosUES = L.esri.featureLayer({
+        url: URL_MUNICIPIOS_UES,
+        style: { color:"#0f766e", weight:2.2, fillColor:"#2dd4bf", fillOpacity:0.04 }
+      });
+
+      const municipiosValle = L.esri.featureLayer({
+        url: URL_MUNICIPIO_VALLE,
+        style: {
+          color: "#8b5cf6",
+          weight: 2.2,
+          fillColor: "#c4b5fd",
+          fillOpacity: 0.05
+        }
+      });
+
+      MUNICIPIOS_VALLE_LABELS = L.layerGroup();
+      municipiosValle.on('load', function(){
+        renderMunicipiosValleLabels(municipiosValle);
+      });
+
+      const veredasValle = L.esri.featureLayer({
+        url: URL_VEREDAS_VALLE,
+        style: { color:"#7c3aed", weight:1, fillColor:"#c4b5fd", fillOpacity:0.02 }
+      });
+
+      const centrosPoblados = L.esri.featureLayer({
+        url: URL_CENTROS_POBLADOS,
+        pointToLayer: function (geojson, latlng) {
+          return L.circleMarker(latlng, {
+            radius:4, color:"#b45309", fillColor:"#f59e0b", fillOpacity:0.8, weight:1
+          });
+        }
+      });
+
+      const turbiedad = L.esri.featureLayer({
+        url: URL_TURBIEDAD,
+        pointToLayer: function (geojson, latlng) {
+          return L.circleMarker(latlng, {
+            radius:5, color:"#0369a1", fillColor:"#38bdf8", fillOpacity:0.85, weight:1.2
+          });
+        }
+      });
+
+      const viasPrincipales = L.esri.featureLayer({
+        url: URL_VIAS_PRINCIPALES,
+        style: { color:"#475569", weight:1.8 }
+      });
+
+      const rios = L.esri.featureLayer({
+        url: URL_RIOS,
+        style: { color:"#0ea5e9", weight:1.8 }
+      });
+
+      RIOS_LABELS = L.layerGroup();
+      rios.on('load', function(){
+        renderRiosLabels(rios);
+      });
+
+      const valleContorno = L.esri.featureLayer({
+        url: URL_VALLE_CONTORNO,
+        style: { color:"#111827", weight:2.5, fillOpacity:0 }
+      });
+
+      municipiosValle.bindPopup(layer => {
+        const p = layer.feature?.properties || {};
+        const nombre = p.MUNICIPIO || p.NOM_MUN || p.NOMBRE || p.MPIO || p.NAME || "-";
+        return `<div style="min-width:220px"><b>Municipio Valle</b><br>${nombre}</div>`;
+      });
+
+      veredasValle.bindPopup(layer => {
+        const p = layer.feature?.properties || {};
+        return `<div style="min-width:220px"><b>Vereda</b><br>${p.NOMBRE_VER || p.NOMBRE || "-"}<br><hr style="margin:6px 0"><b>Municipio:</b> ${p.MUNICIPIO || "-"}</div>`;
+      });
+
+      centrosPoblados.bindPopup(layer => {
+        const p = layer.feature?.properties || {};
+        return `<div style="min-width:220px"><b>Centro poblado</b><br>${p.NOMBRE || p.CENTRO || "-"}</div>`;
+      });
+
+      turbiedad.bindPopup(layer => {
+        const p = layer.feature?.properties || {};
+        return `<div style="min-width:220px"><b>Turbiedad</b><br>${p.NOMBRE || p.PUNTO || p.SITIO || "-"}<br><hr style="margin:6px 0"><b>Valor:</b> ${p.TURBIEDAD || p.VALOR || "-"}</div>`;
+      });
+
+      viasPrincipales.bindPopup(layer => {
+        const p = layer.feature?.properties || {};
+        return `<div style="min-width:220px"><b>Vía principal</b><br>${p.NOMBRE || p.VIA || "-"}</div>`;
+      });
+
+      rios.bindPopup(layer => {
+        const p = layer.feature?.properties || {};
+        return `<div style="min-width:220px"><b>Río</b><br>${p.NOM1_DRENAJE || p.NOMBRE || p.RIO || "-"}</div>`;
+      });
+
+      YEAR_LAYERS = {
+        "IRCAS · 2020": L.layerGroup(),
+        "IRCAS · 2021": L.layerGroup(),
+        "IRCAS · 2022": L.layerGroup(),
+        "IRCAS · 2023": L.layerGroup(),
+        "IRCAS · 2024": L.layerGroup(),
+        "IRCAS · 2025": L.layerGroup().addTo(MAP),
+        "Analítica · Heatmap riesgo poblacional": L.layerGroup(),
+        "Territorial · Municipios Valle": municipiosValle,
+        "Territorial · Veredas Valle": veredasValle,
+        "Territorial · Centros poblados": centrosPoblados,
+        "Territorial · Vías principales": viasPrincipales,
+        "Territorial · Ríos": rios,
+        "Territorial · Valle contorno": valleContorno,
+        "Territorial · Municipios UES": municipiosUES,
+        "Territorial · Turbiedad": turbiedad
+      };
+
+      PANEL_LAYERS = {
+        ircas2020: YEAR_LAYERS["IRCAS · 2020"],
+        ircas2021: YEAR_LAYERS["IRCAS · 2021"],
+        ircas2022: YEAR_LAYERS["IRCAS · 2022"],
+        ircas2023: YEAR_LAYERS["IRCAS · 2023"],
+        ircas2024: YEAR_LAYERS["IRCAS · 2024"],
+        ircas2025: YEAR_LAYERS["IRCAS · 2025"],
+        heatmap: YEAR_LAYERS["Analítica · Heatmap riesgo poblacional"],
+        municipiosValle: YEAR_LAYERS["Territorial · Municipios Valle"],
+        municipiosValleLabels: MUNICIPIOS_VALLE_LABELS,
+        veredasValle: YEAR_LAYERS["Territorial · Veredas Valle"],
+        centrosPoblados: YEAR_LAYERS["Territorial · Centros poblados"],
+        viasPrincipales: YEAR_LAYERS["Territorial · Vías principales"],
+        rios: YEAR_LAYERS["Territorial · Ríos"],
+        riosLabels: RIOS_LABELS,
+        valleContorno: YEAR_LAYERS["Territorial · Valle contorno"],
+        municipiosUES: YEAR_LAYERS["Territorial · Municipios UES"],
+        turbiedad: YEAR_LAYERS["Territorial · Turbiedad"]
+      };
+
+      document.getElementById("legend").innerHTML = `
+        <div class="legend-title">Clasificación del IRCA</div>
+        ${Object.entries(RISK_COLORS).map(([k,c]) => `<div><i style="background:${c}"></i>${k}</div>`).join("")}
+      `;
+    }
+
+    function initCustomLayerPanel(){
+      const checks = document.querySelectorAll('#layerPanel input[type="checkbox"]');
+      checks.forEach(chk => {
+        chk.addEventListener('change', function(){
+          const key = this.dataset.layer;
+          const layer = PANEL_LAYERS[key];
+          if(!layer) return;
+
+          if (key === "municipiosValle") {
+            const labelCheck = document.querySelector('#layerPanel input[data-layer="municipiosValleLabels"]');
+            if (labelCheck) {
+              labelCheck.checked = this.checked;
+              const labelLayer = PANEL_LAYERS["municipiosValleLabels"];
+              if (labelLayer) {
+                if (this.checked) {
+                  if (!MAP.hasLayer(labelLayer)) MAP.addLayer(labelLayer);
+                } else {
+                  if (MAP.hasLayer(labelLayer)) MAP.removeLayer(labelLayer);
+                }
+              }
+            }
+          }
+
+          if(this.checked){
+            if(!MAP.hasLayer(layer)) MAP.addLayer(layer);
+          } else {
+            if(MAP.hasLayer(layer)) MAP.removeLayer(layer);
+          }
+        });
+      });
+    }
+
+    function initBasemapControls(){
+      const radios = document.querySelectorAll('#layerPanel input[name="basemap"]');
+
+      radios.forEach(radio => {
+        radio.addEventListener('change', function(){
+          const key = this.value;
+          const nextBasemap = BASEMAPS[key];
+          if(!nextBasemap) return;
+
+          if(currentBasemap && MAP.hasLayer(currentBasemap)){
+            MAP.removeLayer(currentBasemap);
+          }
+
+          currentBasemap = nextBasemap;
+          currentBasemap.addTo(MAP);
+        });
+      });
+    }
+
+    function syncPanelLayersWithMap(){
+      const checks = document.querySelectorAll('#layerPanel input[type="checkbox"]');
+      checks.forEach(chk => {
+        const key = chk.dataset.layer;
+        const layer = PANEL_LAYERS[key];
+        if(!layer) return;
+
+        if(chk.checked){
+          if(!MAP.hasLayer(layer)) MAP.addLayer(layer);
+        } else {
+          if(MAP.hasLayer(layer)) MAP.removeLayer(layer);
+        }
+      });
+    }
+
+    function createCircleMarker(d, year){
+      const irca = d[getIRCAField(year)];
+      const riesgo = d[getRiskField(year)];
+      const fecha = d[getFechaField(year)];
+      const color = riskColor(riesgo);
+
+      return L.circleMarker([d.LATITUD, d.LONGITUD], {
+        radius:8, color:color, fillColor:color, fillOpacity:0.86, weight:1.4
+      }).bindPopup(buildPopupHTML(d, year, riesgo, color, irca, fecha));
+    }
+
+    function clearMainLayers(){
+      Object.entries(YEAR_LAYERS).forEach(([name, layer]) => {
+        if(name.startsWith("IRCAS ·") || name.startsWith("Analítica ·")){
+          if(layer && layer.clearLayers) layer.clearLayers();
+        }
+      });
+    }
+
+    function renderMapResumenIRCA(data){
+      const year = chartYearFilter || document.getElementById("fano").value || "2025";
+      const riskField = getRiskField(year);
+
+      const categoriasOrden = ["SIN RIESGO","BAJO","MEDIO","ALTO","INVIABLE SANITARIAMENTE","SIN DATO"];
+      const conteo = {};
+      categoriasOrden.forEach(cat => conteo[cat] = 0);
+
+      data.forEach(d => {
+        const riesgo = norm(d[riskField] || "SIN DATO");
+        if (conteo[riesgo] == null) conteo[riesgo] = 0;
+        conteo[riesgo]++;
+      });
+
+      const resumenEl = document.getElementById("mapResumenIRCA");
+      if (!resumenEl) return;
+
+      resumenEl.innerHTML = categoriasOrden.map(cat => {
+        const color = RISK_COLORS[cat] || "#6c757d";
+        const textColor = (cat === "SIN RIESGO" || cat === "INVIABLE SANITARIAMENTE") ? "#fff" : "#111";
+        return `<span class="risk-badge" style="background:${color}; color:${textColor};">${cat}: ${conteo[cat] || 0}</span>`;
+      }).join(" ");
+    }
+
+    function buildHeatLayer(data, year){
+      const layer = YEAR_LAYERS["Analítica · Heatmap riesgo poblacional"];
+      layer.clearLayers();
+
+      const pts = data.filter(d => Number.isFinite(d.LATITUD) && Number.isFinite(d.LONGITUD));
+      if(!pts.length) return;
+
+      const values = pts.map(d => (d.POBLACION || 0) * riskFactor(d[getRiskField(year)]));
+      const maxWeight = Math.max(...values, 1);
+
+      pts.forEach(d => {
+        const risk = d[getRiskField(year)];
+        const color = riskColor(risk);
+        const population = d.POBLACION || 0;
+        const weight = population * riskFactor(risk);
+        const radius = 20 + (weight / maxWeight) * 55;
+
+        const circle = L.circle([d.LATITUD, d.LONGITUD], {
+          radius: radius * 22, color: color, fillColor: color, fillOpacity: 0.14, weight: 1
+        }).bindPopup(`
+          <div class="popup-irca">
+            <div class="popup-title">HEATMAP ANALÍTICO</div>
+            <div class="popup-subtitle">${(d.PERSONA_PRESTADORA || "SIN PRESTADOR").toUpperCase()}</div>
+            <div class="popup-row"><span class="popup-label">Municipio:</span> ${d.MUNICIPIO || "-"}</div>
+            <div class="popup-row"><span class="popup-label">Año:</span> ${year}</div>
+            <div class="popup-row"><span class="popup-label">Población:</span> ${(population || 0).toLocaleString("es-CO")}</div>
+            <div class="popup-row"><span class="popup-label">Riesgo:</span> ${risk || "-"}</div>
+            <div class="popup-row"><span class="popup-label">Factor de riesgo:</span> ${riskFactor(risk)}</div>
+            <div class="popup-row"><span class="popup-label">Peso analítico:</span> ${Math.round(weight).toLocaleString("es-CO")}</div>
+          </div>
+        `);
+        layer.addLayer(circle);
+      });
+    }
+
+    function renderMainMap(data){
+      clearMainLayers();
+
+      const years = ["2020","2021","2022","2023","2024","2025"];
+      const ptsActual = data.filter(d => Number.isFinite(d.LATITUD) && Number.isFinite(d.LONGITUD));
+      document.getElementById("mapCount").textContent = `${ptsActual.length} sistemas`;
+      renderMapResumenIRCA(data);
+
+      years.forEach(year => {
+        const layer = YEAR_LAYERS[`IRCAS · ${year}`];
+        data.forEach(d => {
+          if(!Number.isFinite(d.LATITUD) || !Number.isFinite(d.LONGITUD)) return;
+          layer.addLayer(createCircleMarker(d, year));
+        });
+      });
+
+      const selectedYear = chartYearFilter || document.getElementById("fano").value || "2025";
+      buildHeatLayer(data, selectedYear);
+
+      if(ptsActual.length){
+        const bounds = L.latLngBounds(ptsActual.map(d => [d.LATITUD, d.LONGITUD]));
+        MAP.fitBounds(bounds.pad(0.12));
+      }
+
+      syncPanelLayersWithMap();
+    }
+
+    function initCompareMaps(){
+      MAP_COMPARE_2020 = L.map("mapCompare2020", { zoomControl: true }).setView([3.9, -76.3], 8);
+      MAP_COMPARE_2025 = L.map("mapCompare2025", { zoomControl: true }).setView([3.9, -76.3], 8);
+
+      const cartoLight2020 = L.tileLayer(
+        "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+        { maxZoom: 20, attribution: "&copy; CARTO" }
+      );
+      const cartoLight2025 = L.tileLayer(
+        "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+        { maxZoom: 20, attribution: "&copy; CARTO" }
+      );
+
+      cartoLight2020.addTo(MAP_COMPARE_2020);
+      cartoLight2025.addTo(MAP_COMPARE_2025);
+
+      compareLayer2020 = L.layerGroup().addTo(MAP_COMPARE_2020);
+      compareLayer2025 = L.layerGroup().addTo(MAP_COMPARE_2025);
+
+      const sync = (source, target) => {
+        source.on("move", () => {
+          if(syncLock) return;
+          syncLock = true;
+          target.setView(source.getCenter(), source.getZoom(), { animate:false });
+          syncLock = false;
+        });
+      };
+
+      sync(MAP_COMPARE_2020, MAP_COMPARE_2025);
+      sync(MAP_COMPARE_2025, MAP_COMPARE_2020);
+    }
+
+    function renderCompareMaps(data){
+      compareLayer2020.clearLayers();
+      compareLayer2025.clearLayers();
+
+      const pts = data.filter(d => Number.isFinite(d.LATITUD) && Number.isFinite(d.LONGITUD));
+      if(!pts.length) return;
+
+      pts.forEach(d => {
+        compareLayer2020.addLayer(createCircleMarker(d, "2020"));
+        compareLayer2025.addLayer(createCircleMarker(d, "2025"));
+      });
+
+      const bounds = L.latLngBounds(pts.map(d => [d.LATITUD, d.LONGITUD]));
+      MAP_COMPARE_2020.fitBounds(bounds.pad(0.12));
+      MAP_COMPARE_2025.fitBounds(bounds.pad(0.12));
+    }
+
+    function renderKPIs(data){
+      const total = data.length;
+      const promedio = avg(data.map(d => d.IRCA_Promedio));
+      const ircaActual = avg(data.map(d => d.IRCA_ACTUAL));
+      const poblacion = data.reduce((acc, d) => acc + (d.POBLACION || 0), 0);
+      const suscriptores = data.reduce((acc, d) => acc + (d.SUSCRIPTORES || 0), 0);
+
+      const sinRiesgo = data.filter(d => norm(d.RIESGO_ACTUAL) === "SIN RIESGO").length;
+      const bajo = data.filter(d => norm(d.RIESGO_ACTUAL) === "BAJO").length;
+      const medio = data.filter(d => norm(d.RIESGO_ACTUAL) === "MEDIO").length;
+      const alto = data.filter(d => norm(d.RIESGO_ACTUAL) === "ALTO").length;
+      const inviable = data.filter(d => norm(d.RIESGO_ACTUAL) === "INVIABLE SANITARIAMENTE").length;
+
+      document.getElementById("kpiSistemas").textContent = total.toLocaleString("es-CO");
+      document.getElementById("kpiPromedio").textContent = promedio.toFixed(2);
+      document.getElementById("kpiIRCAActual").textContent = ircaActual.toFixed(2);
+      document.getElementById("kpiPoblacion").textContent = poblacion.toLocaleString("es-CO");
+      document.getElementById("kpiSuscriptores").textContent = suscriptores.toLocaleString("es-CO");
+
+      document.getElementById("kpiIRCA2020").textContent = avg(data.map(d => d.IRCA_2020)).toFixed(2);
+      document.getElementById("kpiIRCA2021").textContent = avg(data.map(d => d.IRCA_2021)).toFixed(2);
+      document.getElementById("kpiIRCA2022").textContent = avg(data.map(d => d.IRCA_2022)).toFixed(2);
+      document.getElementById("kpiIRCA2023").textContent = avg(data.map(d => d.IRCA_2023)).toFixed(2);
+      document.getElementById("kpiIRCA2024").textContent = avg(data.map(d => d.IRCA_2024)).toFixed(2);
+      document.getElementById("kpiIRCA2025").textContent = avg(data.map(d => d.IRCA_2025)).toFixed(2);
+
+      document.getElementById("kpiSinRiesgo").textContent = pct(sinRiesgo, total) + "%";
+      document.getElementById("kpiBajo").textContent = pct(bajo, total) + "%";
+      document.getElementById("kpiMedio").textContent = pct(medio, total) + "%";
+      document.getElementById("kpiAlto").textContent = pct(alto, total) + "%";
+      document.getElementById("kpiInviable").textContent = pct(inviable, total) + "%";
+    }
+
+    function computePriority(d){
+      const risk = norm(d.RIESGO_ACTUAL || "SIN DATO");
+      const factorRisk = riskFactor(risk);
+      const pop = d.POBLACION || 0;
+      const hasTreatment = norm(d.ALGUN_TIPO_TRATAMIENTO || "");
+      const noTreatmentFactor = (hasTreatment === "NO" || hasTreatment === "0" || hasTreatment === "FALSE" || hasTreatment === "") ? 1.25 : 1.0;
+      const score = factorRisk * Math.log10(pop + 1) * noTreatmentFactor;
+      return Number.isFinite(score) ? score : 0;
+    }
+
+    function renderAnalytics(data){
+      const criticalSystems = data.filter(d => {
+        const r = norm(d.RIESGO_ACTUAL || "SIN DATO");
+        return r === "ALTO" || r === "INVIABLE SANITARIAMENTE";
+      });
+
+      const popRisk = data
+        .filter(d => {
+          const r = norm(d.RIESGO_ACTUAL || "SIN DATO");
+          return r === "MEDIO" || r === "ALTO" || r === "INVIABLE SANITARIAMENTE";
+        })
+        .reduce((a,b)=>a+(b.POBLACION||0),0);
+
+      const popAlta = data
+        .filter(d => {
+          const r = norm(d.RIESGO_ACTUAL || "SIN DATO");
+          return r === "ALTO" || r === "INVIABLE SANITARIAMENTE";
+        })
+        .reduce((a,b)=>a+(b.POBLACION||0),0);
+
+      const noTreatment = data.filter(d => {
+        const t = norm(d.ALGUN_TIPO_TRATAMIENTO || "");
+        return t === "NO" || t === "0" || t === "FALSE" || t === "";
+      });
+
+      document.getElementById("anaKpiCriticos").textContent = criticalSystems.length.toLocaleString("es-CO");
+      document.getElementById("anaKpiPobRiesgo").textContent = popRisk.toLocaleString("es-CO");
+      document.getElementById("anaKpiPobAlta").textContent = popAlta.toLocaleString("es-CO");
+      document.getElementById("anaKpiSinTrat").textContent = noTreatment.length.toLocaleString("es-CO");
+
+      const alerts = [];
+      const highPopThreshold = 5000;
+
+      criticalSystems
+        .sort((a,b)=>(b.POBLACION||0)-(a.POBLACION||0))
+        .slice(0,3)
+        .forEach(d => {
+          alerts.push(`Sistema crítico en <b>${d.MUNICIPIO || "-"}</b> con prestador <b>${(d.PERSONA_PRESTADORA || "-").toUpperCase()}</b> y población ${(d.POBLACION||0).toLocaleString("es-CO")}.`);
+        });
+
+      data.filter(d => {
+        const r = norm(d.RIESGO_ACTUAL || "SIN DATO");
+        const t = norm(d.ALGUN_TIPO_TRATAMIENTO || "");
+        return (r === "MEDIO" || r === "ALTO" || r === "INVIABLE SANITARIAMENTE") &&
+               (t === "NO" || t === "0" || t === "FALSE" || t === "");
+      }).slice(0,2).forEach(d => {
+        alerts.push(`Sistema sin tratamiento reportado y riesgo ${d.RIESGO_ACTUAL || "-"} en <b>${d.MUNICIPIO || "-"}</b>.`);
+      });
+
+      data.filter(d => (d.POBLACION || 0) >= highPopThreshold && norm(d.RIESGO_ACTUAL || "SIN DATO") !== "SIN RIESGO")
+        .slice(0,2).forEach(d => {
+          alerts.push(`Sistema con alta población abastecida y riesgo activo en <b>${d.MUNICIPIO || "-"}</b>.`);
+        });
+
+      const alertBox = document.getElementById("anaAlertas");
+      alertBox.innerHTML = alerts.length
+        ? alerts.map(a => `<div class="analytic-alert">${a}</div>`).join("")
+        : `<div class="analytic-alert" style="border-left-color:#16a34a;background:#f6fff8;">No se detectaron alertas prioritarias con los filtros actuales.</div>`;
+
+      const topSystems = [...data]
+        .map(d => ({...d, PRIORIDAD: computePriority(d)}))
+        .sort((a,b)=>b.PRIORIDAD-a.PRIORIDAD)
+        .slice(0,10);
+
+      document.getElementById("anaTopSistemas").innerHTML = topSystems.map(d => `
+        <tr>
+          <td>${(d.PERSONA_PRESTADORA || "-").slice(0,30)}</td>
+          <td>${d.MUNICIPIO || "-"}</td>
+          <td>${Number(d.IRCA_ACTUAL || 0).toFixed(2)}</td>
+          <td>${d.PRIORIDAD.toFixed(2)}</td>
+        </tr>
+      `).join("");
+
+      const muniMap = {};
+      data.forEach(d => {
+        const k = d.MUNICIPIO || "Sin municipio";
+        if(!muniMap[k]){
+          muniMap[k] = { municipio:k, ircas:[], pobRisk:0, priority:0 };
+        }
+        if(Number.isFinite(d.IRCA_ACTUAL)) muniMap[k].ircas.push(d.IRCA_ACTUAL);
+
+        const r = norm(d.RIESGO_ACTUAL || "SIN DATO");
+        if(r === "MEDIO" || r === "ALTO" || r === "INVIABLE SANITARIAMENTE"){
+          muniMap[k].pobRisk += (d.POBLACION || 0);
+        }
+        muniMap[k].priority += computePriority(d);
+      });
+
+      const topMunicipios = Object.values(muniMap)
+        .map(m => ({
+          ...m,
+          ircaProm: avg(m.ircas),
+          scoreMunicipal: m.priority + Math.log10((m.pobRisk || 0) + 1) * 10
+        }))
+        .sort((a,b)=>b.scoreMunicipal-a.scoreMunicipal)
+        .slice(0,10);
+
+      document.getElementById("anaTopMunicipios").innerHTML = topMunicipios.map(m => `
+        <tr>
+          <td>${m.municipio}</td>
+          <td>${Number(m.ircaProm || 0).toFixed(2)}</td>
+          <td>${(m.pobRisk || 0).toLocaleString("es-CO")}</td>
+          <td>${m.scoreMunicipal.toFixed(2)}</td>
+        </tr>
+      `).join("");
+    }
+
+    function destroyChart(id){
+      if(charts[id]) charts[id].destroy();
+    }
+
+    function renderCharts(data){
+      const year = chartYearFilter || document.getElementById("fano").value || "2025";
+
+      const historicalYears = ["2020","2021","2022","2023","2024","2025"];
+      const historicalAvg = historicalYears.map(y => avg(data.map(d => d[getIRCAField(y)])));
+      const selectedYear = year;
+
+      const pointRadius = historicalYears.map(y => y === selectedYear ? 8 : 5);
+      const pointBackgroundColor = historicalYears.map(y => y === selectedYear ? "#ff0000" : "#2e64d2");
+      const pointBorderColor = historicalYears.map(y => y === selectedYear ? "#ffffff" : "#2e64d2");
+      const pointBorderWidth = historicalYears.map(y => y === selectedYear ? 3 : 1.5);
+
+      destroyChart("chartHistorico");
+      charts.chartHistorico = new Chart(document.getElementById("chartHistorico"), {
+        type: "line",
+        data: {
+          labels: historicalYears,
+          datasets: [{
+            label: "IRCA promedio",
+            data: historicalAvg,
+            borderColor: "#2e64d2",
+            backgroundColor: "rgba(46,100,210,0.18)",
+            fill: true,
+            tension: 0.25,
+            pointRadius,
+            pointHoverRadius: pointRadius.map(v => v + 1),
+            pointBackgroundColor,
+            pointBorderColor,
+            pointBorderWidth
+          }]
+        },
+        options: {
+          maintainAspectRatio: false,
+          responsive: true,
+          onClick: (evt, elements) => {
+            if (!elements.length) return;
+            const i = elements[0].index;
+            const anioSeleccionado = historicalYears[i];
+            chartYearFilter = chartYearFilter === anioSeleccionado ? "" : anioSeleccionado;
+            applyFilters();
+          },
+          plugins: {
+            legend: { position: "top" },
+            tooltip: {
+              callbacks: { label: c => ` ${Number(c.raw || 0).toFixed(2)}` }
+            },
+            datalabels: { display: false }
+          },
+          scales: { y: { beginAtZero: true, max: 100 } }
+        }
+      });
+
+      const byMunicipio = {};
+      data.forEach(d => {
+        if(!d.MUNICIPIO) return;
+        if(!byMunicipio[d.MUNICIPIO]) byMunicipio[d.MUNICIPIO] = [];
+        if(Number.isFinite(d.IRCA_ACTUAL)) byMunicipio[d.MUNICIPIO].push(d.IRCA_ACTUAL);
+      });
+
+      const municipioPairs = Object.entries(byMunicipio)
+        .map(([k, arr]) => [k, avg(arr)])
+        .sort((a,b) => b[1] - a[1])
+        .slice(0, 15);
+
+      destroyChart("chartMunicipio");
+      charts.chartMunicipio = new Chart(document.getElementById("chartMunicipio"), {
+        type: "bar",
+        data: {
+          labels: municipioPairs.map(x => x[0]),
+          datasets: [{
+            label: `IRCA promedio ${year}`,
+            data: municipioPairs.map(x => x[1]),
+            backgroundColor: "rgba(46,100,210,0.35)",
+            borderColor: "#2e64d2",
+            borderWidth: 1,
+            borderRadius: 6
+          }]
+        },
+        options: {
+          maintainAspectRatio: false,
+          responsive: true,
+          indexAxis: "y",
+          onClick: (evt, elements) => {
+            if (!elements.length) return;
+            const i = elements[0].index;
+            const municipioSeleccionado = municipioPairs[i][0];
+            chartMunicipioFilter = chartMunicipioFilter === municipioSeleccionado ? "" : municipioSeleccionado;
+            applyFilters();
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: { label: c => ` ${Number(c.raw || 0).toFixed(2)}` }
+            },
+            datalabels: {
+              anchor: 'end',
+              align: 'right',
+              offset: -4,
+              clamp: true,
+              color: '#0f172a',
+              font: { weight: 700 },
+              formatter: v => Number(v).toFixed(2)
+            }
+          },
+          scales: { x: { beginAtZero: true, max: 100 } }
+        }
+      });
+
+      const byRisk = {};
+      data.forEach(d => {
+        const k = d.RIESGO_ACTUAL || "SIN DATO";
+        byRisk[k] = (byRisk[k] || 0) + 1;
+      });
+
+      const riskLabels = Object.keys(byRisk);
+      const total = riskLabels.reduce((acc, k) => acc + byRisk[k], 0);
+      const riskValues = riskLabels.map(k => byRisk[k]);
+
+      destroyChart("chartRiesgo");
+      charts.chartRiesgo = new Chart(document.getElementById("chartRiesgo"), {
+        type: "pie",
+        data: {
+          labels: riskLabels,
+          datasets: [{
+            data: riskValues,
+            backgroundColor: riskLabels.map(k => riskColor(k))
+          }]
+        },
+        options: {
+          maintainAspectRatio: false,
+          responsive: true,
+          onClick: (evt, elements) => {
+            if (!elements.length) return;
+            const i = elements[0].index;
+            const riesgoSeleccionado = riskLabels[i];
+            chartRiskFilter = chartRiskFilter === riesgoSeleccionado ? "" : riesgoSeleccionado;
+            applyFilters();
+          },
+          plugins: {
+            legend: { position: "bottom" },
+            tooltip: {
+              callbacks: {
+                label: c => {
+                  const p = total ? ((c.raw / total) * 100) : 0;
+                  return ` ${c.label}: ${c.raw} (${p.toFixed(1)}%)`;
+                }
+              }
+            },
+            datalabels: {
+              color: '#111',
+              font: { weight: 700, size: 12 },
+              formatter: (value) => {
+                const p = total ? (value / total) * 100 : 0;
+                return `${p.toFixed(1)}%`;
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function renderTable(data){
+      const year = chartYearFilter || document.getElementById("fano").value || "2025";
+
+      const rows = data.map(d => [
+        d.CODIGO_SISTEMA || "",
+        d.CODIGO_IVC || "",
+        d.MUNICIPIO || "",
+        d.ARO || "",
+        d.PERSONA_PRESTADORA || "",
+        d.FORMA_ORGANIZATIVA || "",
+        d.TIPO_SISTEMA_TRATAMIENTO || "",
+        d.ALGUN_TIPO_TRATAMIENTO || "",
+        d.LOCALIDADES_ABASTECIDAS || "",
+        d.SUSCRIPTORES || 0,
+        d.POBLACION || 0,
+        d.IRCA_ACTUAL ?? "",
+        d.RIESGO_ACTUAL || "",
+        d.FECHA_ACTUAL || "",
+        d.PUNTO_TOMA_2025 || ""
+      ]);
+
+      if(DT) DT.destroy();
+
+      DT = $("#tbl").DataTable({
+        data: rows,
+        columns: [
+          { title:"CODIGO_SISTEMA" },
+          { title:"CODIGO_IVC" },
+          { title:"MUNICIPIO" },
+          { title:"ARO" },
+          { title:"PERSONA_PRESTADORA" },
+          { title:"FORMA_ORGANIZATIVA" },
+          { title:"TIPO_SISTEMA_TRATAMIENTO" },
+          { title:"ALGUN_TIPO_TRATAMIENTO" },
+          { title:"LOCALIDADES_ABASTECIDAS" },
+          { title:"SUSCRIPTORES" },
+          { title:"POBLACION" },
+          { title:`IRCA_${year}` },
+          { title:`RIESGO_${year}` },
+          { title:`FECHA_IRCA_${year}` },
+          { title:"PUNTO_TOMA_2025" }
+        ],
+        pageLength: 10,
+        order: [[11, "desc"]],
+        language: { url:"https://cdn.datatables.net/plug-ins/1.13.8/i18n/es-ES.json" },
+        dom: "Bfrtip",
+        buttons: [
+          { extend:"excelHtml5", title:"IRCAS_UESVALLE", text:"Excel", className:"btn btn-success btn-sm" },
+          { extend:"csvHtml5", title:"IRCAS_UESVALLE", text:"CSV", className:"btn btn-outline-secondary btn-sm" },
+          { extend:"print", text:"Imprimir", className:"btn btn-outline-primary btn-sm" }
+        ]
+      });
+    }
+
+    function applyFilters(){
+      const year = chartYearFilter || document.getElementById("fano").value || "2025";
+      const riskField = getRiskField(year);
+
+      if (chartYearFilter) {
+        document.getElementById("fano").value = chartYearFilter;
+      }
+
+      LIST = RAW.filter(d => {
+        if(document.getElementById("fmunicipio").value && d.MUNICIPIO !== document.getElementById("fmunicipio").value) return false;
+        if(document.getElementById("faro").value && d.ARO !== document.getElementById("faro").value) return false;
+        if(document.getElementById("fcodivc").value && String(d.CODIGO_IVC) !== document.getElementById("fcodivc").value) return false;
+        if(document.getElementById("ftipoSistema").value && d.TIPO_SISTEMA_TRATAMIENTO !== document.getElementById("ftipoSistema").value) return false;
+        if(document.getElementById("falgunTrat").value && String(d.ALGUN_TIPO_TRATAMIENTO) !== document.getElementById("falgunTrat").value) return false;
+        if(document.getElementById("fprestador").value && d.PERSONA_PRESTADORA !== document.getElementById("fprestador").value) return false;
+        if(document.getElementById("fformaOrg").value && d.FORMA_ORGANIZATIVA !== document.getElementById("fformaOrg").value) return false;
+        if(document.getElementById("fpuntoToma").value && d.PUNTO_TOMA_2025 !== document.getElementById("fpuntoToma").value) return false;
+
+        if(chartMunicipioFilter && d.MUNICIPIO !== chartMunicipioFilter) return false;
+        if(chartRiskFilter && norm(d[riskField] || "SIN DATO") !== norm(chartRiskFilter)) return false;
+
+        return true;
+      }).map(d => ({
+        ...d,
+        IRCA_ACTUAL: d[getIRCAField(year)],
+        RIESGO_ACTUAL: d[getRiskField(year)],
+        FECHA_ACTUAL: d[getFechaField(year)],
+        ANO_ACTUAL: year
+      }));
+
+      renderKPIs(LIST);
+      renderMainMap(LIST);
+      renderCompareMaps(LIST);
+      renderAnalytics(LIST);
+      renderCharts(LIST);
+      renderTable(LIST);
+    }
+
+    async function loadData(){
+      const btn = document.getElementById("btnCargar");
+      btn.disabled = true;
+      btn.textContent = "Cargando…";
+
+      try{
+        const res = await fetchCSV();
+        RAW = parseRows(res.data);
+        fillFilters(RAW);
+        cascadeFilterOptions();
+        applyFilters();
+
+        document.getElementById("lastUpdate").textContent = "Última carga: " + new Date().toLocaleString();
+        document.getElementById("lastUpdate").className = "badge text-bg-success last-update-badge";
+      }catch(e){
+        console.error(e);
+        document.getElementById("lastUpdate").textContent = "Error cargando CSV";
+        document.getElementById("lastUpdate").className = "badge text-bg-danger last-update-badge";
+        alert("No se pudo cargar IRCAS.csv");
+      }finally{
+        btn.disabled = false;
+        btn.textContent = "Refrescar datos";
+      }
+    }
+
+    document.getElementById("btnFiltrar").addEventListener("click", applyFilters);
+
+    document.getElementById("btnLimpiar").addEventListener("click", () => {
+      chartRiskFilter = "";
+      chartMunicipioFilter = "";
+      chartYearFilter = "";
+
+      document.getElementById("fano").value = "2025";
+      ["fmunicipio","faro","fcodivc","ftipoSistema","falgunTrat","fprestador","fformaOrg","fpuntoToma"]
+        .forEach(id => {
+          const el = document.getElementById(id);
+          el.value = "";
+        });
+
+      cascadeFilterOptions();
+      applyFilters();
+    });
+
+    document.getElementById("btnCargar").addEventListener("click", loadData);
+
+    initMainMap();
+    initCustomLayerPanel();
+    initBasemapControls();
+    initCompareMaps();
+    loadData();
+  </script>
+</body>
+</html>

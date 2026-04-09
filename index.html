@@ -14,89 +14,74 @@
         onerror="this.href='https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css'"/>
   <link href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css" rel="stylesheet"/>
   <link href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet"/>
 
   <!-- 🎨 Estilos -->
   <style>
-    :root { --board-max: 1180px; }
-    body { background:#f4f6f8; color:#212529; }
+    :root{
+      --board-max: 1460px;
+      --shadow-soft: 0 8px 24px rgba(0,0,0,.06);
+      --border-soft: 1px solid #e9ecef;
+      --brand-blue: #2e64d2;
+      --bg-page: #f4f6f8;
+      --text-muted:#667085;
+    }
 
-    /* Banner GOV.CO (no fijo) */
-    .gov-banner { background-color:#2e64d2; height:46px; width:100%; z-index:10; }
-    .gov-banner img { height:30px; }
+    body{ background:var(--bg-page); color:#212529; }
+    .gov-banner{ background-color:#2e64d2; height:46px; width:100%; z-index:10; }
+    .gov-banner img{ height:30px; }
+    .bg-shell{ background:var(--bg-page); min-height:100vh; }
+    .board{ max-width:var(--board-max); margin:0 auto; padding:24px 16px 36px; }
 
-    /* Contenedor principal centrado */
-    .bg-shell { background:#f4f6f8; min-height:100vh; }
-    .board { max-width:var(--board-max); margin:0 auto; padding:24px 16px; }
+    .soft-card,.kpi-card,.chart-card,.nav-card,header{
+      border:0; border-radius:1rem; box-shadow:var(--shadow-soft); background:#fff;
+    }
 
-    header { background:#fff; border:0; border-radius:1rem; box-shadow:0 8px 24px rgba(0,0,0,.06); }
-    header .logo { height:56px }
+    .header-ues{ border-bottom:var(--border-soft); }
+    .header-ues .brand-strip{
+      display:flex; justify-content:center; align-items:center; gap:.75rem; flex-wrap:wrap;
+    }
+    .header-ues .brand-strip img{ max-width:100%; height:auto; }
 
-    .kpi-card,.chart-card,.soft-card { border:0; border-radius:1rem; box-shadow:0 8px 24px rgba(0,0,0,.06); background:#fff }
-    .kpi-value{ font-size:clamp(20px,3.2vw,36px); font-weight:800 }
+    .board-title{
+      font-size:clamp(1.5rem,2vw,2.1rem);
+      font-weight:800; color:#1f2937; margin:0;
+    }
+    .board-subtitle{ color:var(--text-muted); font-size:.95rem; }
+    .last-update-badge{ font-size:.95rem; padding:.5rem .8rem; border-radius:999px; }
 
-    .chart-container{ height:380px; position:relative }
+    .navbar .nav-link,.navbar .dropdown-toggle{ font-weight:600; }
+    .dropdown-menu .dropdown-item.active{ background:#2e64d2; }
 
-    #map{ height:520px; border-radius:.75rem }
-    .legend { background:#fff; padding:.5rem .75rem; border-radius:.5rem; line-height:1.2; box-shadow:0 1px 3px rgba(0,0,0,.15) }
-    #legend div { margin:2px 0; font-size:0.85rem; }
-    #legend i { display:inline-block; width:12px; height:12px; border-radius:50%; margin-right:6px; vertical-align:middle; }
+    .nav-processes{
+      display:flex; flex-wrap:wrap; justify-content:center; align-items:center;
+    }
+    .process-btn{
+      background:#f8fafc; border:1px solid #d0d5dd; border-radius:999px;
+      padding:.65rem 1rem !important; color:#344054 !important; font-weight:700;
+      box-shadow:0 2px 6px rgba(0,0,0,.04); transition:all .2s ease;
+    }
+    .process-btn:hover{ background:#eef4ff; border-color:#98a2b3; }
+    .process-btn.active{ background:#2e64d2; color:#fff !important; border-color:#2e64d2; }
 
-    .dt-buttons .btn{ margin-right:.25rem }
-	
-	/* ======= Header UESVALLE responsive ======= */
-.header-ues {
-  background: #fff;
-  border-bottom: 1px solid #e9ecef;
-}
+    .kpi-card{ height:100%; }
+    .kpi-value{ font-size:clamp(20px,3.2vw,36px); font-weight:800; }
+    .filter-label{ font-size:.88rem; font-weight:600; color:#475467; }
+    .chart-container{ height:380px; position:relative; }
 
-.header-ues .brand-strip {
-  display: flex;
-  flex-wrap: wrap;          /* Permite que los logos bajen a segunda línea */
-  align-items: center;
-  gap: .5rem .75rem;        /* Espacio entre logos */
-}
+    #map{ height:520px; border-radius:.75rem; }
+    .legend{ background:#fff; padding:.5rem .75rem; border-radius:.5rem; line-height:1.2; box-shadow:0 1px 3px rgba(0,0,0,.15); }
+    #legend div{ margin:2px 0; font-size:0.85rem; }
+    #legend i{ display:inline-block; width:12px; height:12px; border-radius:50%; margin-right:6px; vertical-align:middle; }
 
-.header-ues .brand-strip img {
-  height: 48px;             /* Tamaño por defecto en desktop/tablet */
-  width: auto;
-}
+    .dt-buttons .btn{ margin-right:.25rem; }
+    .truncate-1{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
-.header-ues .title-wrap {
-  min-width: 220px;
-}
-
-/* XS: teléfonos */
-@media (max-width: 576px) {
-  .header-ues .brand-strip img {
-    height: 32px;           /* Logos más pequeños en móvil */
-  }
-  .header-ues .title-wrap h1 {
-    font-size: 1rem;        /* Título más compacto */
-    line-height: 1.25;
-  }
-  .header-ues .meta-line {
-    display: flex;
-    flex-wrap: wrap;
-    gap: .25rem .5rem;
-  }
-  .header-ues .meta-line .badge {
-    font-size: .75rem;
-  }
-  .board {                  /* un poco más de “respiro” lateral en móvil */
-    padding-left: 10px;
-    padding-right: 10px;
-  }
-  #map { height: 60vh; }    /* mapa más alto en móvil, opcional */
-}
-
-/* Truncamiento elegante por si el texto se alarga */
-.truncate-1 {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-	
-	
+    @media (max-width: 576px){
+      .board{ padding-left:10px; padding-right:10px; }
+      .board-title{ font-size:1.15rem; }
+      #map{ height:60vh; }
+    }
   </style>
 </head>
 <body>
@@ -112,75 +97,108 @@
   <main class="bg-shell">
     <div class="board">
 
-      <!-- Header UESVALLE -->
-      
-<header class="header-ues py-2">
-	<div class="container-fluid px-3">
-		<div class="row g-2 align-items-center">
-      
-      <!-- Logos (se acomodan en varias líneas en móvil) -->
-     <div class="col-12 col-lg-6">
-        <div class="brand-strip">
-          <img src="https://www.uesvalle.gov.co/info/uesvalle/media/bloque1656.png" alt="UESVALLE" loading="lazy">
-          </div>
-     </div>
-
-      <!-- Título + meta -->
-      <div class="col-12 col-lg-6">
-        <div class="title-wrap">
-          <h1 class="h5 m-0 truncate-1">Tablero – Encuestas de Saneamiento con Filtros de Agua</h1>
-          <div class="small text-muted meta-line mt-1">
-            <span>Fuente: https://github.com (CSV)</span>
-            <span id="lastUpdate" class="badge text-bg-light border">Cargando…</span>
+      <header class="header-ues py-2 mb-3">
+        <div class="container-fluid px-3">
+          <div class="brand-strip">
+            <img src="https://www.uesvalle.gov.co/info/uesvalle/media/bloque1656.png" alt="UESVALLE" loading="lazy" class="img-fluid">
           </div>
         </div>
-      </div>
+      </header>
 
-    </div>
-  </div>
-</header>
-     
-	 <!-- Filtros -->
-      <section class="container-fluid px-3 my-3">
-        <section class="soft-card p-3 mb-3">
-          <div class="row g-3 align-items-end">
-            <div class="col-6 col-md-2">
-              <label class="form-label mb-1">Año</label>
-              <select id="fano" class="form-select form-select-sm"><option value="">Todos</option></select>
-            </div>
-            <div class="col-6 col-md-2">
-              <label class="form-label mb-1">Mes</label>
-              <select id="fmes" class="form-select form-select-sm"><option value="">Todos</option></select>
-            </div>
-            <div class="col-6 col-md-3">
-              <label class="form-label mb-1">Encuestador</label>
-              <select id="fencuestador" class="form-select form-select-sm"><option value="">Todos</option></select>
-            </div>
-            <div class="col-6 col-md-3">
-              <label class="form-label mb-1">Municipio</label>
-              <select id="fmpio" class="form-select form-select-sm"><option value="">Todos</option></select>
-            </div>
-            <div class="col-12 col-md-4">
-			<div class="row g-2 align-items-end">
-				<div class="col-6">
-				<label for="fdesde" class="form-label">Desde</label>
-				<input type="date" id="fdesde" class="form-control">
-				</div>
-				<div class="col-6">
-				<label for="fhasta" class="form-label">Hasta</label>
-				<input type="date" id="fhasta" class="form-control">
-				</div>
-			</div>
-			</div>
-            <div class="col-12 col-md-4 ms-auto d-flex gap-2 justify-content-end">
-              <button id="btnFiltrar" class="btn btn-primary btn-sm">Aplicar filtros</button>
-              <button id="btnLimpiar" class="btn btn-outline-secondary btn-sm">Limpiar</button>
-              <button id="btnCargar" class="btn btn-outline-primary btn-sm">Refrescar datos</button>
+      <section class="nav-card p-3 mb-3">
+        <nav class="navbar navbar-expand-lg bg-white rounded-4">
+          <div class="container-fluid d-flex flex-column align-items-center">
+            <div class="fw-bold mb-3 fs-5">Procesos</div>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navPrincipal">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse justify-content-center" id="navPrincipal">
+              <ul class="navbar-nav mb-2 mb-lg-0 nav-processes">
+                <li class="nav-item dropdown mx-2 my-1">
+                  <a class="nav-link dropdown-toggle process-btn active" href="#" role="button" data-bs-toggle="dropdown">
+                    1. Agua para consumo
+                  </a>
+                  <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="./ircas.html">1.1 IRCAS</a></li>
+                    <li><a class="dropdown-item active" href="./TableroFiltrosAgua.html">1.2 Filtros</a></li>
+                  </ul>
+                </li>
+
+                <li class="nav-item dropdown mx-2 my-1">
+                  <a class="nav-link dropdown-toggle process-btn" href="#" role="button" data-bs-toggle="dropdown">
+                    2. Alimentos y medicamentos
+                  </a>
+                  <ul class="dropdown-menu"><li><a class="dropdown-item disabled" href="#">Próximamente</a></li></ul>
+                </li>
+
+                <li class="nav-item dropdown mx-2 my-1">
+                  <a class="nav-link dropdown-toggle process-btn" href="#" role="button" data-bs-toggle="dropdown">
+                    3. Zoonosis
+                  </a>
+                  <ul class="dropdown-menu"><li><a class="dropdown-item disabled" href="#">Próximamente</a></li></ul>
+                </li>
+
+                <li class="nav-item dropdown mx-2 my-1">
+                  <a class="nav-link dropdown-toggle process-btn" href="#" role="button" data-bs-toggle="dropdown">
+                    4. Establecimientos interés sanitario EIS
+                  </a>
+                  <ul class="dropdown-menu"><li><a class="dropdown-item disabled" href="#">Próximamente</a></li></ul>
+                </li>
+              </ul>
             </div>
           </div>
-        </section>
+        </nav>
+      </section>
 
-        <!-- KPIs -->
+      <section class="soft-card p-3 mb-3">
+        <div class="d-flex flex-column flex-lg-row align-items-lg-center">
+          <div class="me-auto">
+            <h1 class="board-title">Tablero – Encuestas de Saneamiento con Filtros de Agua</h1>
+            <div class="board-subtitle mt-1">Fuente: GitHub CSV</div>
+          </div>
+          <div class="mt-2 mt-lg-0">
+            <span id="lastUpdate" class="badge text-bg-success last-update-badge">Cargando…</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="soft-card p-3 mb-3">
+        <div class="row g-3 align-items-end">
+          <div class="col-12 col-sm-6 col-md-2">
+            <label class="form-label filter-label mb-1">Año</label>
+            <select id="fano" class="form-select form-select-sm"><option value="">Todos</option></select>
+          </div>
+          <div class="col-12 col-sm-6 col-md-2">
+            <label class="form-label filter-label mb-1">Mes</label>
+            <select id="fmes" class="form-select form-select-sm"><option value="">Todos</option></select>
+          </div>
+          <div class="col-12 col-sm-6 col-md-3">
+            <label class="form-label filter-label mb-1">Encuestador</label>
+            <select id="fencuestador" class="form-select form-select-sm"><option value="">Todos</option></select>
+          </div>
+          <div class="col-12 col-sm-6 col-md-3">
+            <label class="form-label filter-label mb-1">Municipio</label>
+            <select id="fmpio" class="form-select form-select-sm"><option value="">Todos</option></select>
+          </div>
+          <div class="col-12 col-md-2">
+            <label for="fdesde" class="form-label filter-label mb-1">Desde</label>
+            <input type="date" id="fdesde" class="form-control form-control-sm">
+          </div>
+          <div class="col-12 col-md-2">
+            <label for="fhasta" class="form-label filter-label mb-1">Hasta</label>
+            <input type="date" id="fhasta" class="form-control form-control-sm">
+          </div>
+          <div class="col-12 col-md-10 d-flex gap-2 justify-content-center justify-content-md-end pt-2 flex-wrap">
+            <button id="btnFiltrar" class="btn btn-primary btn-sm px-4">Aplicar filtros</button>
+            <button id="btnLimpiar" class="btn btn-outline-secondary btn-sm px-4">Limpiar</button>
+            <button id="btnCargar" class="btn btn-outline-primary btn-sm px-4">Refrescar datos</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- KPIs -->
         <section class="row g-3 mb-3">
           <div class="col-12 col-sm-6 col-lg-3">
             <div class="kpi-card p-3"><div class="small text-muted">Encuestas</div><div id="kpiTotal" class="kpi-value">–</div></div>
@@ -314,6 +332,7 @@
  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>

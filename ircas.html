@@ -1,4 +1,6 @@
-<!doctype html>
+from pathlib import Path
+
+html = r'''<!doctype html>
 <html lang="es">
 <head>
   <meta charset="utf-8"/>
@@ -150,36 +152,119 @@
     #mapResumenIRCA .risk-badge{
       display:inline-block; margin:2px 4px; padding:4px 10px; border-radius:999px;
       font-size:.82rem; font-weight:700; line-height:1.2; border:1px solid rgba(0,0,0,.08);
+      transition:transform .15s ease, box-shadow .15s ease, outline .15s ease;
+    }
+
+    .risk-badge-active{
+      outline:3px solid #111827;
+      transform:translateY(-1px);
+      box-shadow:0 4px 10px rgba(0,0,0,.18);
+    }
+
+    .layer-toggle-btn{
+      position:absolute;
+      top:12px;
+      right:12px;
+      z-index:520;
+      width:42px;
+      height:42px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:#fff;
+      border:1px solid rgba(0,0,0,.08);
+      border-radius:10px;
+      box-shadow:0 8px 20px rgba(0,0,0,.15);
+      cursor:pointer;
+      color:#475467;
+    }
+
+    .layer-toggle-btn:hover{
+      background:#f8fafc;
+    }
+
+    .layer-toggle-btn svg{
+      width:22px;
+      height:22px;
     }
 
     .custom-layer-panel{
-      position:absolute; top:12px; right:12px; z-index:500; width:290px; max-height:80%;
-      overflow:auto; background:#fff; border:1px solid rgba(0,0,0,.08);
-      border-radius:14px; box-shadow:0 8px 24px rgba(0,0,0,.18); padding:10px 12px;
+      position:absolute;
+      top:12px;
+      right:12px;
+      z-index:530;
+      width:290px;
+      max-height:80%;
+      overflow:auto;
+      background:#fff;
+      border:1px solid rgba(0,0,0,.08);
+      border-radius:14px;
+      box-shadow:0 8px 24px rgba(0,0,0,.18);
+      padding:10px 12px;
+      transition:opacity .18s ease, transform .18s ease;
+    }
+
+    .custom-layer-panel.collapsed{
+      opacity:0;
+      pointer-events:none;
+      transform:translateY(-6px) scale(.98);
     }
 
     .layer-panel-header{
-      font-weight:800; font-size:.95rem; color:#1f2937; margin-bottom:8px;
+      font-weight:800;
+      font-size:.95rem;
+      color:#1f2937;
+      margin-bottom:8px;
+    }
+
+    .layer-close-btn{
+      border:none;
+      background:transparent;
+      font-size:20px;
+      line-height:1;
+      color:#667085;
+      cursor:pointer;
+      padding:0 4px;
+    }
+
+    .layer-close-btn:hover{
+      color:#111827;
     }
 
     .custom-layer-panel details{
-      border-top:1px solid #e5e7eb; padding-top:8px; margin-top:8px;
+      border-top:1px solid #e5e7eb;
+      padding-top:8px;
+      margin-top:8px;
     }
     .custom-layer-panel details:first-of-type{
-      border-top:none; padding-top:0; margin-top:0;
+      border-top:none;
+      padding-top:0;
+      margin-top:0;
     }
     .custom-layer-panel summary{
-      cursor:pointer; font-weight:700; color:#334155; margin-bottom:6px; list-style:none;
+      cursor:pointer;
+      font-weight:700;
+      color:#334155;
+      margin-bottom:6px;
+      list-style:none;
     }
-    .custom-layer-panel summary::-webkit-details-marker{ display:none; }
+    .custom-layer-panel summary::-webkit-details-marker{
+      display:none;
+    }
     .custom-layer-panel label{
-      display:block; font-size:.88rem; color:#475467; margin:5px 0; cursor:pointer;
+      display:block;
+      font-size:.88rem;
+      color:#475467;
+      margin:5px 0;
+      cursor:pointer;
     }
     .custom-layer-panel input[type="checkbox"],
-    .custom-layer-panel input[type="radio"]{ margin-right:8px; }
+    .custom-layer-panel input[type="radio"]{
+      margin-right:8px;
+    }
 
     .municipio-label div{
-      background: rgba(255,255,255,0.75);
+      background: rgba(255,255,255,0.78);
       color: #5b21b6;
       border: 1px solid rgba(91,33,182,.18);
       border-radius: 8px;
@@ -275,13 +360,40 @@
       margin-bottom:.2rem;
     }
 
+    .active-filters-wrap{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+
+    .active-filter-chip{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      background:#eef4ff;
+      border:1px solid #c7d7fe;
+      color:#1d4ed8;
+      border-radius:999px;
+      padding:6px 10px;
+      font-size:.84rem;
+      font-weight:700;
+    }
+
+    .active-filter-chip .label{
+      color:#475467;
+      font-weight:600;
+    }
+
     @media (max-width: 992px){
       #map{ height:68vh; min-height:620px; }
       .compare-map{ height:420px; }
     }
 
     @media (max-width: 768px){
-      .custom-layer-panel{ width:220px; max-height:65%; }
+      .custom-layer-panel{
+        width:220px;
+        max-height:65%;
+      }
     }
 
     @media (max-width: 576px){
@@ -425,6 +537,20 @@
         </div>
       </section>
 
+      <section class="soft-card p-3 mb-3">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <div>
+            <div class="fw-bold mb-2">Filtros activos</div>
+            <div id="activeFilters" class="active-filters-wrap">
+              <span class="text-muted">Sin filtros adicionales</span>
+            </div>
+          </div>
+          <div>
+            <button id="btnClearActiveFilters" class="btn btn-outline-danger btn-sm">Limpiar filtros activos</button>
+          </div>
+        </div>
+      </section>
+
       <section class="row g-3 mb-3">
         <div class="col-12 col-sm-6 col-lg-2"><div class="kpi-card p-3"><div class="kpi-label">Sistemas</div><div id="kpiSistemas" class="kpi-value">–</div></div></div>
         <div class="col-12 col-sm-6 col-lg-2"><div class="kpi-card p-3"><div class="kpi-label">IRCA promedio</div><div id="kpiPromedio" class="kpi-value">–</div><div class="kpi-mini">Promedio histórico filtrado</div></div></div>
@@ -478,8 +604,18 @@
         <div class="position-relative">
           <div id="map"></div>
 
-          <div id="layerPanel" class="custom-layer-panel">
-            <div class="layer-panel-header">Capas del mapa</div>
+          <div id="layerToggle" class="layer-toggle-btn" title="Capas del mapa">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 3 2 8l10 5 10-5-10-5Zm0 7.2L4.4 8 12 4.8 19.6 8 12 10.2Zm-10 3.3 10 5 10-5M2 18l10 5 10-5"
+                    fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+
+          <div id="layerPanel" class="custom-layer-panel collapsed">
+            <div class="layer-panel-header d-flex justify-content-between align-items-center">
+              <span>Capas del mapa</span>
+              <button id="layerClose" class="layer-close-btn" type="button" aria-label="Cerrar panel">×</button>
+            </div>
 
             <details open>
               <summary>Mapas base</summary>
@@ -504,16 +640,16 @@
               <label><input type="checkbox" data-layer="heatmap"> Heatmap riesgo poblacional</label>
             </details>
 
-            <details>
+            <details open>
               <summary>Territorial</summary>
-              <label><input type="checkbox" data-layer="municipiosValle"> Municipios Valle</label>
+              <label><input type="checkbox" data-layer="municipiosValle" checked> Municipios Valle</label>
               <label><input type="checkbox" data-layer="municipiosValleLabels" checked> Etiquetas municipios Valle</label>
-              <label><input type="checkbox" data-layer="veredasValle"> Veredas Valle</label>
-              <label><input type="checkbox" data-layer="centrosPoblados"> Centros poblados</label>
+              <label><input type="checkbox" data-layer="veredasValle" checked> Veredas Valle</label>
+              <label><input type="checkbox" data-layer="centrosPoblados" checked> Centros poblados</label>
               <label><input type="checkbox" data-layer="viasPrincipales"> Vías principales</label>
               <label><input type="checkbox" data-layer="rios"> Ríos</label>
               <label><input type="checkbox" data-layer="riosLabels"> Etiquetas ríos</label>
-              <label><input type="checkbox" data-layer="valleContorno"> Valle contorno</label>
+              <label><input type="checkbox" data-layer="valleContorno" checked> Valle contorno</label>
               <label><input type="checkbox" data-layer="municipiosUES"> Municipios UES</label>
               <label><input type="checkbox" data-layer="turbiedad"> Turbiedad</label>
             </details>
@@ -803,10 +939,13 @@
     let currentBasemap = null;
     let MUNICIPIOS_VALLE_LABELS = null;
     let RIOS_LABELS = null;
+    let MUNICIPIOS_VALLE_LAYER_REF = null;
+    let selectedMunicipioBounds = null;
 
     let chartRiskFilter = "";
     let chartMunicipioFilter = "";
     let chartYearFilter = "";
+    let mapRiskBadgeFilter = "";
 
     let MAP;
     let YEAR_LAYERS = {};
@@ -1087,14 +1226,22 @@
         const nombre = p.MUNICIPIO || p.NOM_MUN || p.NOMBRE || p.MPIO || p.NAME || "";
         if(!nombre) return;
 
-        const center = featureLayer.getBounds ? featureLayer.getBounds().getCenter() : null;
+        let center = null;
+        if(featureLayer.getBounds){
+          const b = featureLayer.getBounds();
+          if(b && b.isValid()) center = b.getCenter();
+        }
         if(!center) return;
+
+        const isSelected =
+          document.getElementById("fmunicipio")?.value &&
+          norm(document.getElementById("fmunicipio").value) === norm(nombre);
 
         const label = L.marker(center, {
           interactive: false,
           icon: L.divIcon({
             className: 'municipio-label',
-            html: `<div>${nombre}</div>`
+            html: `<div style="${isSelected ? 'background:rgba(219,234,254,.95);border:1px solid #2563eb;color:#1d4ed8;font-size:12px;font-weight:800;' : ''}">${nombre}</div>`
           })
         });
 
@@ -1104,19 +1251,15 @@
 
     function renderRiosLabels(layerRef){
       if(!RIOS_LABELS) return;
-
       RIOS_LABELS.clearLayers();
 
       layerRef.eachFeature(function(featureLayer){
         const p = featureLayer.feature?.properties || {};
         const nombre = p.NOM1_DRENAJE || p.NOMBRE || p.RIO || "";
-
         if(!nombre) return;
 
         let center = null;
-        if (featureLayer.getBounds) {
-          center = featureLayer.getBounds().getCenter();
-        }
+        if (featureLayer.getBounds) center = featureLayer.getBounds().getCenter();
         if(!center) return;
 
         const label = L.marker(center, {
@@ -1129,6 +1272,58 @@
 
         RIOS_LABELS.addLayer(label);
       });
+    }
+
+    function refreshMunicipioHighlight(){
+      selectedMunicipioBounds = null;
+      if(!MUNICIPIOS_VALLE_LAYER_REF) return;
+
+      const selectedMunicipio = document.getElementById("fmunicipio")?.value || "";
+
+      MUNICIPIOS_VALLE_LAYER_REF.eachFeature(function(featureLayer){
+        const p = featureLayer.feature?.properties || {};
+        const nombre = p.MUNICIPIO || p.NOM_MUN || p.NOMBRE || p.MPIO || p.NAME || "";
+        const isSelected = selectedMunicipio && norm(nombre) === norm(selectedMunicipio);
+
+        featureLayer.setStyle({
+          color: isSelected ? "#1d4ed8" : "#8b5cf6",
+          weight: isSelected ? 4 : 2.2,
+          fillColor: isSelected ? "#93c5fd" : "#c4b5fd",
+          fillOpacity: isSelected ? 0.18 : 0.05
+        });
+
+        if(isSelected && featureLayer.getBounds){
+          const b = featureLayer.getBounds();
+          if(b && b.isValid()) selectedMunicipioBounds = b;
+        }
+      });
+
+      renderMunicipiosValleLabels(MUNICIPIOS_VALLE_LAYER_REF);
+    }
+
+    function renderActiveFilters(){
+      const wrap = document.getElementById("activeFilters");
+      if(!wrap) return;
+
+      const chips = [];
+      const year = chartYearFilter || document.getElementById("fano")?.value || "2025";
+      chips.push(`<span class="active-filter-chip"><span class="label">Año:</span> ${year}</span>`);
+
+      const addChip = (label, value) => { if(value) chips.push(`<span class="active-filter-chip"><span class="label">${label}:</span> ${value}</span>`); };
+
+      addChip("Municipio", document.getElementById("fmunicipio")?.value);
+      addChip("ARO", document.getElementById("faro")?.value);
+      addChip("Código IVC", document.getElementById("fcodivc")?.value);
+      addChip("Tipo sistema", document.getElementById("ftipoSistema")?.value);
+      addChip("Tratamiento", document.getElementById("falgunTrat")?.value);
+      addChip("Prestador", document.getElementById("fprestador")?.value);
+      addChip("Forma organizativa", document.getElementById("fformaOrg")?.value);
+      addChip("Punto toma", document.getElementById("fpuntoToma")?.value);
+      if(chartMunicipioFilter) chips.push(`<span class="active-filter-chip"><span class="label">Gráfico municipio:</span> ${chartMunicipioFilter}</span>`);
+      if(chartRiskFilter) chips.push(`<span class="active-filter-chip"><span class="label">Gráfico riesgo:</span> ${chartRiskFilter}</span>`);
+      if(mapRiskBadgeFilter) chips.push(`<span class="active-filter-chip"><span class="label">Mapa riesgo:</span> ${mapRiskBadgeFilter}</span>`);
+
+      wrap.innerHTML = chips.length ? chips.join("") : `<span class="text-muted">Sin filtros activos</span>`;
     }
 
     function initMainMap(){
@@ -1173,22 +1368,32 @@
 
       const municipiosValle = L.esri.featureLayer({
         url: URL_MUNICIPIO_VALLE,
-        style: {
-          color: "#8b5cf6",
-          weight: 2.2,
-          fillColor: "#c4b5fd",
-          fillOpacity: 0.05
+        style: function(feature){
+          const p = feature?.properties || {};
+          const nombre = p.MUNICIPIO || p.NOM_MUN || p.NOMBRE || p.MPIO || p.NAME || "";
+          const seleccionado = document.getElementById("fmunicipio")?.value || "";
+          const isSelected = seleccionado && norm(nombre) === norm(seleccionado);
+          return {
+            color: isSelected ? "#1d4ed8" : "#8b5cf6",
+            weight: isSelected ? 4 : 2.2,
+            fillColor: isSelected ? "#93c5fd" : "#c4b5fd",
+            fillOpacity: isSelected ? 0.18 : 0.05
+          };
         }
       });
 
+      MUNICIPIOS_VALLE_LAYER_REF = municipiosValle;
       MUNICIPIOS_VALLE_LABELS = L.layerGroup();
-      municipiosValle.on('load', function(){
-        renderMunicipiosValleLabels(municipiosValle);
-      });
+      municipiosValle.on('load', function(){ renderMunicipiosValleLabels(municipiosValle); });
 
       const veredasValle = L.esri.featureLayer({
         url: URL_VEREDAS_VALLE,
-        style: { color:"#7c3aed", weight:1, fillColor:"#c4b5fd", fillOpacity:0.02 }
+        style: {
+          color:"#c9ced6",
+          weight:0.8,
+          fillColor:"#f5f6f7",
+          fillOpacity:0.02
+        }
       });
 
       const centrosPoblados = L.esri.featureLayer({
@@ -1220,9 +1425,7 @@
       });
 
       RIOS_LABELS = L.layerGroup();
-      rios.on('load', function(){
-        renderRiosLabels(rios);
-      });
+      rios.on('load', function(){ renderRiosLabels(rios); });
 
       const valleContorno = L.esri.featureLayer({
         url: URL_VALLE_CONTORNO,
@@ -1302,6 +1505,8 @@
         <div class="legend-title">Clasificación del IRCA</div>
         ${Object.entries(RISK_COLORS).map(([k,c]) => `<div><i style="background:${c}"></i>${k}</div>`).join("")}
       `;
+
+      setTimeout(() => syncPanelLayersWithMap(), 300);
     }
 
     function initCustomLayerPanel(){
@@ -1338,7 +1543,6 @@
 
     function initBasemapControls(){
       const radios = document.querySelectorAll('#layerPanel input[name="basemap"]');
-
       radios.forEach(radio => {
         radio.addEventListener('change', function(){
           const key = this.value;
@@ -1348,10 +1552,45 @@
           if(currentBasemap && MAP.hasLayer(currentBasemap)){
             MAP.removeLayer(currentBasemap);
           }
-
           currentBasemap = nextBasemap;
           currentBasemap.addTo(MAP);
         });
+      });
+    }
+
+    function initLayerPanelUI(){
+      const toggle = document.getElementById("layerToggle");
+      const panel = document.getElementById("layerPanel");
+      const closeBtn = document.getElementById("layerClose");
+      const mapEl = document.getElementById("map");
+
+      function closePanel(){ panel.classList.add("collapsed"); }
+      function togglePanel(){ panel.classList.toggle("collapsed"); }
+
+      if(toggle){
+        toggle.addEventListener("click", function(e){
+          e.stopPropagation();
+          togglePanel();
+        });
+      }
+
+      if(closeBtn){
+        closeBtn.addEventListener("click", function(e){
+          e.stopPropagation();
+          closePanel();
+        });
+      }
+
+      if(panel){
+        panel.addEventListener("click", function(e){ e.stopPropagation(); });
+      }
+
+      if(mapEl){
+        mapEl.addEventListener("click", function(){ closePanel(); });
+      }
+
+      document.addEventListener("keydown", function(e){
+        if(e.key === "Escape") closePanel();
       });
     }
 
@@ -1392,7 +1631,6 @@
     function renderMapResumenIRCA(data){
       const year = chartYearFilter || document.getElementById("fano").value || "2025";
       const riskField = getRiskField(year);
-
       const categoriasOrden = ["SIN RIESGO","BAJO","MEDIO","ALTO","INVIABLE SANITARIAMENTE","SIN DATO"];
       const conteo = {};
       categoriasOrden.forEach(cat => conteo[cat] = 0);
@@ -1409,14 +1647,22 @@
       resumenEl.innerHTML = categoriasOrden.map(cat => {
         const color = RISK_COLORS[cat] || "#6c757d";
         const textColor = (cat === "SIN RIESGO" || cat === "INVIABLE SANITARIAMENTE") ? "#fff" : "#111";
-        return `<span class="risk-badge" style="background:${color}; color:${textColor};">${cat}: ${conteo[cat] || 0}</span>`;
+        const activeClass = norm(mapRiskBadgeFilter) === cat ? "risk-badge-active" : "";
+        return `<span class="risk-badge ${activeClass}" data-risk-badge="${cat}" style="background:${color}; color:${textColor}; cursor:pointer;">${cat}: ${conteo[cat] || 0}</span>`;
       }).join(" ");
+
+      resumenEl.querySelectorAll("[data-risk-badge]").forEach(el => {
+        el.addEventListener("click", function(){
+          const selected = this.getAttribute("data-risk-badge");
+          mapRiskBadgeFilter = mapRiskBadgeFilter === selected ? "" : selected;
+          applyFilters();
+        });
+      });
     }
 
     function buildHeatLayer(data, year){
       const layer = YEAR_LAYERS["Analítica · Heatmap riesgo poblacional"];
       layer.clearLayers();
-
       const pts = data.filter(d => Number.isFinite(d.LATITUD) && Number.isFinite(d.LONGITUD));
       if(!pts.length) return;
 
@@ -1479,14 +1725,8 @@
       MAP_COMPARE_2020 = L.map("mapCompare2020", { zoomControl: true }).setView([3.9, -76.3], 8);
       MAP_COMPARE_2025 = L.map("mapCompare2025", { zoomControl: true }).setView([3.9, -76.3], 8);
 
-      const cartoLight2020 = L.tileLayer(
-        "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
-        { maxZoom: 20, attribution: "&copy; CARTO" }
-      );
-      const cartoLight2025 = L.tileLayer(
-        "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
-        { maxZoom: 20, attribution: "&copy; CARTO" }
-      );
+      const cartoLight2020 = L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", { maxZoom: 20, attribution: "&copy; CARTO" });
+      const cartoLight2025 = L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", { maxZoom: 20, attribution: "&copy; CARTO" });
 
       cartoLight2020.addTo(MAP_COMPARE_2020);
       cartoLight2025.addTo(MAP_COMPARE_2025);
@@ -1573,19 +1813,15 @@
         return r === "ALTO" || r === "INVIABLE SANITARIAMENTE";
       });
 
-      const popRisk = data
-        .filter(d => {
-          const r = norm(d.RIESGO_ACTUAL || "SIN DATO");
-          return r === "MEDIO" || r === "ALTO" || r === "INVIABLE SANITARIAMENTE";
-        })
-        .reduce((a,b)=>a+(b.POBLACION||0),0);
+      const popRisk = data.filter(d => {
+        const r = norm(d.RIESGO_ACTUAL || "SIN DATO");
+        return r === "MEDIO" || r === "ALTO" || r === "INVIABLE SANITARIAMENTE";
+      }).reduce((a,b)=>a+(b.POBLACION||0),0);
 
-      const popAlta = data
-        .filter(d => {
-          const r = norm(d.RIESGO_ACTUAL || "SIN DATO");
-          return r === "ALTO" || r === "INVIABLE SANITARIAMENTE";
-        })
-        .reduce((a,b)=>a+(b.POBLACION||0),0);
+      const popAlta = data.filter(d => {
+        const r = norm(d.RIESGO_ACTUAL || "SIN DATO");
+        return r === "ALTO" || r === "INVIABLE SANITARIAMENTE";
+      }).reduce((a,b)=>a+(b.POBLACION||0),0);
 
       const noTreatment = data.filter(d => {
         const t = norm(d.ALGUN_TIPO_TRATAMIENTO || "");
@@ -1600,12 +1836,9 @@
       const alerts = [];
       const highPopThreshold = 5000;
 
-      criticalSystems
-        .sort((a,b)=>(b.POBLACION||0)-(a.POBLACION||0))
-        .slice(0,3)
-        .forEach(d => {
-          alerts.push(`Sistema crítico en <b>${d.MUNICIPIO || "-"}</b> con prestador <b>${(d.PERSONA_PRESTADORA || "-").toUpperCase()}</b> y población ${(d.POBLACION||0).toLocaleString("es-CO")}.`);
-        });
+      criticalSystems.sort((a,b)=>(b.POBLACION||0)-(a.POBLACION||0)).slice(0,3).forEach(d => {
+        alerts.push(`Sistema crítico en <b>${d.MUNICIPIO || "-"}</b> con prestador <b>${(d.PERSONA_PRESTADORA || "-").toUpperCase()}</b> y población ${(d.POBLACION||0).toLocaleString("es-CO")}.`);
+      });
 
       data.filter(d => {
         const r = norm(d.RIESGO_ACTUAL || "SIN DATO");
@@ -1626,11 +1859,7 @@
         ? alerts.map(a => `<div class="analytic-alert">${a}</div>`).join("")
         : `<div class="analytic-alert" style="border-left-color:#16a34a;background:#f6fff8;">No se detectaron alertas prioritarias con los filtros actuales.</div>`;
 
-      const topSystems = [...data]
-        .map(d => ({...d, PRIORIDAD: computePriority(d)}))
-        .sort((a,b)=>b.PRIORIDAD-a.PRIORIDAD)
-        .slice(0,10);
-
+      const topSystems = [...data].map(d => ({...d, PRIORIDAD: computePriority(d)})).sort((a,b)=>b.PRIORIDAD-a.PRIORIDAD).slice(0,10);
       document.getElementById("anaTopSistemas").innerHTML = topSystems.map(d => `
         <tr>
           <td>${(d.PERSONA_PRESTADORA || "-").slice(0,30)}</td>
@@ -1643,9 +1872,7 @@
       const muniMap = {};
       data.forEach(d => {
         const k = d.MUNICIPIO || "Sin municipio";
-        if(!muniMap[k]){
-          muniMap[k] = { municipio:k, ircas:[], pobRisk:0, priority:0 };
-        }
+        if(!muniMap[k]) muniMap[k] = { municipio:k, ircas:[], pobRisk:0, priority:0 };
         if(Number.isFinite(d.IRCA_ACTUAL)) muniMap[k].ircas.push(d.IRCA_ACTUAL);
 
         const r = norm(d.RIESGO_ACTUAL || "SIN DATO");
@@ -1656,11 +1883,7 @@
       });
 
       const topMunicipios = Object.values(muniMap)
-        .map(m => ({
-          ...m,
-          ircaProm: avg(m.ircas),
-          scoreMunicipal: m.priority + Math.log10((m.pobRisk || 0) + 1) * 10
-        }))
+        .map(m => ({ ...m, ircaProm: avg(m.ircas), scoreMunicipal: m.priority + Math.log10((m.pobRisk || 0) + 1) * 10 }))
         .sort((a,b)=>b.scoreMunicipal-a.scoreMunicipal)
         .slice(0,10);
 
@@ -1721,9 +1944,7 @@
           },
           plugins: {
             legend: { position: "top" },
-            tooltip: {
-              callbacks: { label: c => ` ${Number(c.raw || 0).toFixed(2)}` }
-            },
+            tooltip: { callbacks: { label: c => ` ${Number(c.raw || 0).toFixed(2)}` } },
             datalabels: { display: false }
           },
           scales: { y: { beginAtZero: true, max: 100 } }
@@ -1737,10 +1958,7 @@
         if(Number.isFinite(d.IRCA_ACTUAL)) byMunicipio[d.MUNICIPIO].push(d.IRCA_ACTUAL);
       });
 
-      const municipioPairs = Object.entries(byMunicipio)
-        .map(([k, arr]) => [k, avg(arr)])
-        .sort((a,b) => b[1] - a[1])
-        .slice(0, 15);
+      const municipioPairs = Object.entries(byMunicipio).map(([k, arr]) => [k, avg(arr)]).sort((a,b) => b[1] - a[1]).slice(0, 15);
 
       destroyChart("chartMunicipio");
       charts.chartMunicipio = new Chart(document.getElementById("chartMunicipio"), {
@@ -1769,16 +1987,10 @@
           },
           plugins: {
             legend: { display: false },
-            tooltip: {
-              callbacks: { label: c => ` ${Number(c.raw || 0).toFixed(2)}` }
-            },
+            tooltip: { callbacks: { label: c => ` ${Number(c.raw || 0).toFixed(2)}` } },
             datalabels: {
-              anchor: 'end',
-              align: 'right',
-              offset: -4,
-              clamp: true,
-              color: '#0f172a',
-              font: { weight: 700 },
+              anchor: 'end', align: 'right', offset: -4, clamp: true,
+              color: '#0f172a', font: { weight: 700 },
               formatter: v => Number(v).toFixed(2)
             }
           },
@@ -1841,7 +2053,6 @@
 
     function renderTable(data){
       const year = chartYearFilter || document.getElementById("fano").value || "2025";
-
       const rows = data.map(d => [
         d.CODIGO_SISTEMA || "",
         d.CODIGO_IVC || "",
@@ -1897,9 +2108,7 @@
       const year = chartYearFilter || document.getElementById("fano").value || "2025";
       const riskField = getRiskField(year);
 
-      if (chartYearFilter) {
-        document.getElementById("fano").value = chartYearFilter;
-      }
+      if (chartYearFilter) document.getElementById("fano").value = chartYearFilter;
 
       LIST = RAW.filter(d => {
         if(document.getElementById("fmunicipio").value && d.MUNICIPIO !== document.getElementById("fmunicipio").value) return false;
@@ -1913,6 +2122,7 @@
 
         if(chartMunicipioFilter && d.MUNICIPIO !== chartMunicipioFilter) return false;
         if(chartRiskFilter && norm(d[riskField] || "SIN DATO") !== norm(chartRiskFilter)) return false;
+        if(mapRiskBadgeFilter && norm(d[riskField] || "SIN DATO") !== norm(mapRiskBadgeFilter)) return false;
 
         return true;
       }).map(d => ({
@@ -1925,10 +2135,16 @@
 
       renderKPIs(LIST);
       renderMainMap(LIST);
+      refreshMunicipioHighlight();
       renderCompareMaps(LIST);
       renderAnalytics(LIST);
       renderCharts(LIST);
       renderTable(LIST);
+      renderActiveFilters();
+
+      if(selectedMunicipioBounds){
+        MAP.fitBounds(selectedMunicipioBounds.pad(0.15));
+      }
     }
 
     async function loadData(){
@@ -1962,12 +2178,36 @@
       chartRiskFilter = "";
       chartMunicipioFilter = "";
       chartYearFilter = "";
+      mapRiskBadgeFilter = "";
 
       document.getElementById("fano").value = "2025";
       ["fmunicipio","faro","fcodivc","ftipoSistema","falgunTrat","fprestador","fformaOrg","fpuntoToma"]
         .forEach(id => {
           const el = document.getElementById(id);
-          el.value = "";
+          if(el){
+            el.value = "";
+            if(el.tomselect) el.tomselect.setValue("", true);
+          }
+        });
+
+      cascadeFilterOptions();
+      applyFilters();
+    });
+
+    document.getElementById("btnClearActiveFilters").addEventListener("click", () => {
+      chartRiskFilter = "";
+      chartMunicipioFilter = "";
+      chartYearFilter = "";
+      mapRiskBadgeFilter = "";
+
+      document.getElementById("fano").value = "2025";
+      ["fmunicipio","faro","fcodivc","ftipoSistema","falgunTrat","fprestador","fformaOrg","fpuntoToma"]
+        .forEach(id => {
+          const el = document.getElementById(id);
+          if(el){
+            el.value = "";
+            if(el.tomselect) el.tomselect.setValue("", true);
+          }
         });
 
       cascadeFilterOptions();
@@ -1979,8 +2219,13 @@
     initMainMap();
     initCustomLayerPanel();
     initBasemapControls();
+    initLayerPanelUI();
     initCompareMaps();
     loadData();
   </script>
 </body>
 </html>
+'''
+out = Path('/mnt/data/ircas_unificado.html')
+out.write_text(html, encoding='utf-8')
+print(out)

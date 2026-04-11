@@ -299,6 +299,46 @@
       color:#667085;
       border-bottom:1px solid #e5e7eb;
     }
+
+    .analytic-table{
+      table-layout: fixed;
+      width: 100%;
+    }
+    .analytic-table td{
+      vertical-align: top;
+      word-break: break-word;
+      white-space: normal;
+    }
+    .analytic-table .col-prestador{
+      width: 54%;
+      min-width: 0;
+      font-weight: 600;
+    }
+    .analytic-table .col-municipio{
+      width: 18%;
+    }
+    .analytic-table .col-irca{
+      width: 12%;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    .analytic-table .col-prioridad{
+      width: 16%;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    .priority-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:4px 8px;
+      border-radius:999px;
+      font-size:.74rem;
+      font-weight:800;
+      border:1px solid rgba(0,0,0,.08);
+      margin-left:6px;
+      white-space:nowrap;
+    }
     .analytic-alert{
       border-left:4px solid #ef4444;
       background:#fff7f7;
@@ -379,6 +419,42 @@
     .active-filter-chip .label{
       color:#475467;
       font-weight:600;
+    }
+
+    .irca-historic-card{
+      border-radius:1.2rem;
+      overflow:hidden;
+      min-height:185px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      transition:transform .15s ease, box-shadow .15s ease;
+    }
+
+    .irca-historic-card:hover{
+      transform:translateY(-2px);
+      box-shadow:0 12px 28px rgba(0,0,0,.08);
+    }
+
+    .irca-risk-chip{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:38px;
+      padding:8px 14px;
+      border-radius:999px;
+      font-size:.88rem;
+      font-weight:800;
+      line-height:1.1;
+      width:fit-content;
+      max-width:100%;
+      border:1px solid rgba(0,0,0,.08);
+      background:rgba(255,255,255,.72);
+      color:#1f2937;
+    }
+
+    .irca-historic-card .kpi-value{
+      font-size:clamp(22px,3vw,38px);
     }
 
     @media (max-width: 992px){
@@ -502,6 +578,11 @@
           </div>
 
           <div class="col-12 col-sm-6 col-md-2">
+            <label class="form-label filter-label mb-1">Tipo</label>
+            <select id="ftipo" class="form-select form-select-sm" multiple></select>
+          </div>
+
+          <div class="col-12 col-sm-6 col-md-2">
             <label class="form-label filter-label mb-1">Tipo sistema tratamiento</label>
             <select id="ftipoSistema" class="form-select form-select-sm"><option value="">Todos</option></select>
           </div>
@@ -560,114 +641,121 @@
         <div class="col-12">
           <div class="soft-card p-3">
             <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
-              <h5 class="mb-0">KPIs históricos de IRCA</h5>
+              <h5 class="mb-0">Históricos de IRCA</h5>
               <div class="section-note">Promedio por año con los filtros aplicados</div>
             </div>
             <div class="row g-3">
-              <div class="col-6 col-md-4 col-lg-2"><div class="kpi-card p-3"><div class="kpi-label">IRCA 2020</div><div id="kpiIRCA2020" class="kpi-value">–</div></div></div>
-              <div class="col-6 col-md-4 col-lg-2"><div class="kpi-card p-3"><div class="kpi-label">IRCA 2021</div><div id="kpiIRCA2021" class="kpi-value">–</div></div></div>
-              <div class="col-6 col-md-4 col-lg-2"><div class="kpi-card p-3"><div class="kpi-label">IRCA 2022</div><div id="kpiIRCA2022" class="kpi-value">–</div></div></div>
-              <div class="col-6 col-md-4 col-lg-2"><div class="kpi-card p-3"><div class="kpi-label">IRCA 2023</div><div id="kpiIRCA2023" class="kpi-value">–</div></div></div>
-              <div class="col-6 col-md-4 col-lg-2"><div class="kpi-card p-3"><div class="kpi-label">IRCA 2024</div><div id="kpiIRCA2024" class="kpi-value">–</div></div></div>
-              <div class="col-6 col-md-4 col-lg-2"><div class="kpi-card p-3"><div class="kpi-label">IRCA 2025</div><div id="kpiIRCA2025" class="kpi-value">–</div></div></div>
+              <div class="col-6 col-md-4 col-lg-2"><div class="kpi-card p-3 irca-historic-card"><div class="kpi-label">IRCA 2020</div><div id="kpiIRCA2020" class="kpi-value">–</div><div id="kpiIRCA2020Risk" class="irca-risk-chip mt-3">–</div></div></div>
+              <div class="col-6 col-md-4 col-lg-2"><div class="kpi-card p-3 irca-historic-card"><div class="kpi-label">IRCA 2021</div><div id="kpiIRCA2021" class="kpi-value">–</div><div id="kpiIRCA2021Risk" class="irca-risk-chip mt-3">–</div></div></div>
+              <div class="col-6 col-md-4 col-lg-2"><div class="kpi-card p-3 irca-historic-card"><div class="kpi-label">IRCA 2022</div><div id="kpiIRCA2022" class="kpi-value">–</div><div id="kpiIRCA2022Risk" class="irca-risk-chip mt-3">–</div></div></div>
+              <div class="col-6 col-md-4 col-lg-2"><div class="kpi-card p-3 irca-historic-card"><div class="kpi-label">IRCA 2023</div><div id="kpiIRCA2023" class="kpi-value">–</div><div id="kpiIRCA2023Risk" class="irca-risk-chip mt-3">–</div></div></div>
+              <div class="col-6 col-md-4 col-lg-2"><div class="kpi-card p-3 irca-historic-card"><div class="kpi-label">IRCA 2024</div><div id="kpiIRCA2024" class="kpi-value">–</div><div id="kpiIRCA2024Risk" class="irca-risk-chip mt-3">–</div></div></div>
+              <div class="col-6 col-md-4 col-lg-2"><div class="kpi-card p-3 irca-historic-card"><div class="kpi-label">IRCA 2025</div><div id="kpiIRCA2025" class="kpi-value">–</div><div id="kpiIRCA2025Risk" class="irca-risk-chip mt-3">–</div></div></div>
             </div>
           </div>
         </div>
       </section>
 
-      <section class="row g-3 mb-3">
-        <div class="col-6 col-md-2"><div class="kpi-card p-3 text-center"><div class="risk-pill" style="background:#00b050; color:#fff;">SIN RIESGO</div><div id="kpiSinRiesgo" class="kpi-value mt-2">0%</div></div></div>
-        <div class="col-6 col-md-2"><div class="kpi-card p-3 text-center"><div class="risk-pill" style="background:#c6e0b4;">BAJO</div><div id="kpiBajo" class="kpi-value mt-2">0%</div></div></div>
-        <div class="col-6 col-md-2"><div class="kpi-card p-3 text-center"><div class="risk-pill" style="background:#ffff00;">MEDIO</div><div id="kpiMedio" class="kpi-value mt-2">0%</div></div></div>
-        <div class="col-6 col-md-2"><div class="kpi-card p-3 text-center"><div class="risk-pill" style="background:#ffc000;">ALTO</div><div id="kpiAlto" class="kpi-value mt-2">0%</div></div></div>
-        <div class="col-12 col-md-4"><div class="kpi-card p-3 text-center"><div class="risk-pill" style="background:#ff0000; color:#fff;">INVIABLE SANITARIAMENTE</div><div id="kpiInviable" class="kpi-value mt-2">0%</div></div></div>
-      </section>
-
-
-""
-
-	<section class="soft-card p-3 mb-4">
-  <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
-    <div>
-      <h5 class="mb-1">Análisis de riesgo</h5>
-      <div class="section-note">
-        Comportamiento histórico de los indicadores de riesgo y consolidado de población en riesgo.
-      </div>
-    </div>
-  </div>
-
-  <div class="row g-3">
-    <div class="col-12 col-xl-8">
-      <div class="chart-card p-3 h-100">
-        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+      <section class="soft-card p-3 mb-3">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
           <div>
-            <h6 class="mb-0">Indicadores históricos por nivel de riesgo (2020–2025)</h6>
-            <div class="section-note">Visualización apilada por año</div>
+            <h5 id="riskIndicatorsTitle" class="mb-1">Indicadores de riesgo – año filtrado: 2025</h5>
+            <div id="riskIndicatorsSubtitle" class="section-note">
+              Distribución de sistemas por riesgo con base en el año activo.
+            </div>
           </div>
-
-          <div style="min-width:220px;">
-            <label class="form-label filter-label mb-1">Métrica del gráfico</label>
-            <select id="riskMetricMode" class="form-select form-select-sm">
-              <option value="poblacion" selected>Población</option>
-              <option value="suscriptores">Suscriptores</option>
-              <option value="porcentaje">Porcentaje</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="chart-container-tall">
-          <canvas id="chartAnalisisRiesgo"></canvas>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-12 col-xl-4">
-      <div class="analytic-card p-3 h-100">
-        <div class="analytic-phase-title">Resumen del año activo</div>
-        <div class="analytic-mini mb-3">
-          Consolidado con base en el año seleccionado en el filtro.
         </div>
 
         <div class="row g-3">
-          <div class="col-12">
-            <div class="kpi-card p-3">
-              <div class="kpi-label">Población sin riesgo<br><span class="analytic-mini">(Sin riesgo + Bajo + Medio)</span></div>
-              <div id="riskKpiPobSinRiesgo" class="kpi-value">–</div>
-            </div>
-          </div>
+          <div class="col-6 col-md-2"><div class="kpi-card p-3 text-center"><div class="risk-pill" style="background:#00b050; color:#fff;">SIN RIESGO</div><div id="kpiSinRiesgo" class="kpi-value mt-2">0%</div></div></div>
+          <div class="col-6 col-md-2"><div class="kpi-card p-3 text-center"><div class="risk-pill" style="background:#c6e0b4;">BAJO</div><div id="kpiBajo" class="kpi-value mt-2">0%</div></div></div>
+          <div class="col-6 col-md-2"><div class="kpi-card p-3 text-center"><div class="risk-pill" style="background:#ffff00;">MEDIO</div><div id="kpiMedio" class="kpi-value mt-2">0%</div></div></div>
+          <div class="col-6 col-md-2"><div class="kpi-card p-3 text-center"><div class="risk-pill" style="background:#ffc000;">ALTO</div><div id="kpiAlto" class="kpi-value mt-2">0%</div></div></div>
+          <div class="col-12 col-md-4"><div class="kpi-card p-3 text-center"><div class="risk-pill" style="background:#ff0000; color:#fff;">INVIABLE SANITARIAMENTE</div><div id="kpiInviable" class="kpi-value mt-2">0%</div></div></div>
+        </div>
 
-          <div class="col-12">
-            <div class="kpi-card p-3">
-              <div class="kpi-label">Población en riesgo<br><span class="analytic-mini">(Alto + Inviable)</span></div>
-              <div id="riskKpiPobEnRiesgo" class="kpi-value">–</div>
-            </div>
-          </div>
+        <div id="riskBaseInfo" class="section-note mt-3">Base porcentual: sistemas con clasificación válida en el año activo.</div>
+      </section>
 
-          <div class="col-12">
-            <div class="kpi-card p-3">
-              <div class="kpi-label">Suscriptores en riesgo</div>
-              <div id="riskKpiSuscriptoresRiesgo" class="kpi-value">–</div>
-            </div>
-          </div>
-
-          <div class="col-12">
-            <div class="kpi-card p-3">
-              <div class="kpi-label">% población en riesgo</div>
-              <div id="riskKpiPctPobRiesgo" class="kpi-value">–</div>
+      <section class="soft-card p-3 mb-4">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+          <div>
+            <h5 class="mb-1">Análisis de riesgo</h5>
+            <div class="section-note" id="riskAnalysisMetricHelp">
+              Distribución histórica de la población abastecida por nivel de riesgo y resumen del año activo.
             </div>
           </div>
         </div>
-      </div>
-    </div>
-  </div>
-</section>
 
+        <div class="row g-3">
+          <div class="col-12 col-xl-8">
+            <div class="chart-card p-3 h-100">
+              <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+                <div>
+                  <h6 class="mb-0">Indicadores históricos por nivel de riesgo (2020–2025)</h6>
+                  <div class="section-note" id="riskChartSubtitle">Visualización apilada por año</div>
+                </div>
 
+                <div style="min-width:220px;">
+                  <label class="form-label filter-label mb-1">Métrica del gráfico</label>
+                  <select id="riskMetricMode" class="form-select form-select-sm">
+                    <option value="poblacion" selected>Población</option>
+                    <option value="suscriptores">Suscriptores</option>
+                    <option value="porcentaje">Porcentaje</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="chart-container-tall">
+                <canvas id="chartAnalisisRiesgo"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-xl-4">
+            <div class="analytic-card p-3 h-100">
+              <div class="analytic-phase-title">Resumen del año activo</div>
+              <div class="analytic-mini mb-3" id="riskSummaryType">
+                Consolidado con base en el año seleccionado en el filtro y por tipo de sistema.
+              </div>
+
+              <div class="row g-3">
+                <div class="col-12">
+                  <div class="kpi-card p-3">
+                    <div class="kpi-label">Población sin riesgo<br><span class="analytic-mini">(Sin riesgo + Bajo + Medio)</span></div>
+                    <div id="riskKpiPobSinRiesgo" class="kpi-value">–</div>
+                  </div>
+                </div>
+
+                <div class="col-12">
+                  <div class="kpi-card p-3" style="border-left:4px solid #ef4444;">
+                    <div class="kpi-label">Población en riesgo<br><span class="analytic-mini">(Alto + Inviable)</span></div>
+                    <div id="riskKpiPobEnRiesgo" class="kpi-value">–</div>
+                  </div>
+                </div>
+
+                <div class="col-12">
+                  <div class="kpi-card p-3">
+                    <div class="kpi-label">Suscriptores en riesgo</div>
+                    <div id="riskKpiSuscriptoresRiesgo" class="kpi-value">–</div>
+                  </div>
+                </div>
+
+                <div class="col-12">
+                  <div class="kpi-card p-3">
+                    <div class="kpi-label">% población en riesgo</div>
+                    <div id="riskKpiPctPobRiesgo" class="kpi-value">–</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <section class="soft-card p-3 mb-4">
         <div class="d-flex align-items-start justify-content-between flex-wrap gap-2 mb-2">
           <div>
-		  
             <h5 class="mb-1">Mapa de IRCAS</h5>
             <div class="map-info">Activa capas anuales, cambia mapa base y consulta detalle por sistema.</div>
           </div>
@@ -761,157 +849,7 @@
         </div>
       </section>
 
-      <section class="soft-card p-3 mb-4">
-        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
-          <div>
-            <h5 class="mb-1">Analítica de priorización y seguimiento</h5>
-            <div class="section-note">Bloque analítico posterior al componente espacial. Fase 1 implementada; Fases 2 y 3 listas para crecer.</div>
-          </div>
-        </div>
-
-        <div class="row g-4 mb-3">
-          <div class="col-12 col-xl-4">
-            <div class="analytic-card p-3 h-100">
-              <div class="analytic-phase-title">Fase 1 · Ejecutiva</div>
-              <div class="analytic-mini mb-3">Priorización, población expuesta, alertas y rankings.</div>
-
-              <div class="row g-3 mb-3">
-                <div class="col-6">
-                  <div class="kpi-card p-3">
-                    <div class="kpi-label">Sistemas críticos</div>
-                    <div id="anaKpiCriticos" class="kpi-value">–</div>
-                  </div>
-                </div>
-                <div class="col-6">
-                  <div class="kpi-card p-3">
-                    <div class="kpi-label">Población riesgo ≥ medio</div>
-                    <div id="anaKpiPobRiesgo" class="kpi-value">–</div>
-                  </div>
-                </div>
-                <div class="col-6">
-                  <div class="kpi-card p-3">
-                    <div class="kpi-label">Población alto/inviable</div>
-                    <div id="anaKpiPobAlta" class="kpi-value">–</div>
-                  </div>
-                </div>
-                <div class="col-6">
-                  <div class="kpi-card p-3">
-                    <div class="kpi-label">Sistemas sin tratamiento</div>
-                    <div id="anaKpiSinTrat" class="kpi-value">–</div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="analytic-phase-title mb-2">Alertas automáticas</div>
-              <div id="anaAlertas"></div>
-            </div>
-          </div>
-
-          <div class="col-12 col-xl-4">
-            <div class="analytic-card p-3 h-100">
-              <div class="analytic-phase-title">Top 10 sistemas críticos</div>
-              <div class="analytic-mini mb-2">Ranking de sistemas priorizados con base en riesgo sanitario, población y condición de tratamiento.</div>
-
-              <div class="analytic-method-box mb-3">
-                <div class="analytic-method-title">¿Cómo se calcula?</div>
-                <div class="analytic-method-text">
-                  El indicador de prioridad del sistema se construye combinando:
-                  <b>nivel de riesgo IRCA del año activo</b>,
-                  <b>población abastecida</b> y
-                  <b>condición de tratamiento</b>.
-                </div>
-                <div class="analytic-formula mt-2">
-                  Prioridad = factor de riesgo × log10(población + 1) × factor de tratamiento
-                </div>
-                <div class="analytic-method-list mt-2">
-                  <div><b>Factor de riesgo:</b> Sin riesgo = 0, Bajo = 1, Medio = 2, Alto = 3, Inviable = 4.</div>
-                  <div><b>Factor de tratamiento:</b> aumenta cuando el sistema no reporta tratamiento.</div>
-                  <div><b>Interpretación:</b> a mayor valor, mayor prioridad de atención.</div>
-                </div>
-              </div>
-
-              <div class="table-responsive">
-                <table class="table table-sm analytic-table">
-                  <thead>
-                    <tr>
-                      <th>Prestador</th>
-                      <th>Municipio</th>
-                      <th>IRCA</th>
-                      <th>Prioridad</th>
-                    </tr>
-                  </thead>
-                  <tbody id="anaTopSistemas"></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-12 col-xl-4">
-            <div class="analytic-card p-3 h-100">
-              <div class="analytic-phase-title">Top 10 municipios críticos</div>
-              <div class="analytic-mini mb-2">Ranking municipal a partir de la criticidad agregada de sus sistemas y la población expuesta.</div>
-
-              <div class="analytic-method-box mb-3">
-                <div class="analytic-method-title">¿Cómo se calcula?</div>
-                <div class="analytic-method-text">
-                  El indicador municipal consolida la situación del municipio combinando:
-                  <b>promedio IRCA</b>,
-                  <b>población expuesta en riesgo medio o superior</b> y
-                  <b>suma de prioridades de los sistemas filtrados</b>.
-                </div>
-                <div class="analytic-formula mt-2">
-                  Score municipal = suma de prioridades de sistemas + presión poblacional en riesgo
-                </div>
-                <div class="analytic-method-list mt-2">
-                  <div><b>IRCA promedio:</b> describe el comportamiento general del municipio.</div>
-                  <div><b>Población en riesgo:</b> cuantifica el impacto potencial sobre la población abastecida.</div>
-                  <div><b>Interpretación:</b> a mayor score, mayor criticidad municipal.</div>
-                </div>
-              </div>
-
-              <div class="table-responsive">
-                <table class="table table-sm analytic-table">
-                  <thead>
-                    <tr>
-                      <th>Municipio</th>
-                      <th>IRCA prom.</th>
-                      <th>Pob. riesgo</th>
-                      <th>Score</th>
-                    </tr>
-                  </thead>
-                  <tbody id="anaTopMunicipios"></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="row g-4">
-          <div class="col-12 col-lg-6">
-            <div class="analytic-card p-3 h-100">
-              <div class="analytic-phase-title">Fase 2 · Territorial</div>
-              <div class="analytic-mini mb-3">Preparada para cruces con capas territoriales.</div>
-              <div class="analytic-placeholder">
-                Este bloque está listo para crecer con analítica espacial, como:
-                cruce con sedes educativas, centros poblados, ríos, vías principales,
-                veredas y fichas territoriales por municipio.
-              </div>
-            </div>
-          </div>
-
-          <div class="col-12 col-lg-6">
-            <div class="analytic-card p-3 h-100">
-              <div class="analytic-phase-title">Fase 3 · Predictiva y seguimiento</div>
-              <div class="analytic-mini mb-3">Preparada para tendencia y proyección.</div>
-              <div class="analytic-placeholder">
-                Este bloque está listo para incorporar:
-                tendencia por sistema, mejora/empeora/estable, cobertura del dato,
-                proyección simple del IRCA y seguimiento institucional de intervenciones.
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      
 
       <section class="row g-4 mb-4">
         <div class="col-12">
@@ -1004,7 +942,7 @@
     };
 
     const FILTER_IDS = [
-      "fano","fmunicipio","faro","fcodivc","ftipoSistema",
+      "fano","fmunicipio","faro","fcodivc","ftipo","ftipoSistema",
       "falgunTrat","fprestador","fformaOrg","fpuntoToma"
     ];
 
@@ -1025,7 +963,8 @@
     let chartMunicipioFilter = "";
     let chartYearFilter = "";
     let mapRiskBadgeFilter = "";
-	let riskMetricMode = "poblacion";
+    let riskMetricMode = "poblacion";
+
     let MAP;
     let YEAR_LAYERS = {};
 
@@ -1097,6 +1036,7 @@
         CODIGO_SISTEMA: r["CODIGO_SISTEMA"] ?? "",
         CODIGO_IVC: r["CODIGO IVC2"] ?? "",
         MUNICIPIO: r["MUNICIPIO"] ?? "",
+        TIPO: r["TIPO"] ?? "",
         ARO: r["ARO"] ?? "",
         PERSONA_PRESTADORA: r["Persona Prestadora"] ?? "",
         FORMA_ORGANIZATIVA: r["Forma_organizativa"] ?? "",
@@ -1142,14 +1082,18 @@
       FILTER_IDS.forEach(id => {
         if (selectInstances[id]) selectInstances[id].destroy();
         const el = document.getElementById(id);
+        const isMulti = id === "ftipo";
+
         selectInstances[id] = new TomSelect(el, {
           create: false,
-          allowEmptyOption: true,
+          allowEmptyOption: !isMulti,
           maxOptions: 5000,
           sortField: { field: "text", direction: "asc" },
           searchField: ["text"],
-          placeholder: "Buscar o seleccionar..."
+          placeholder: isMulti ? "Seleccione uno o varios..." : "Buscar o seleccionar...",
+          plugins: isMulti ? ["remove_button"] : []
         });
+
         el.tomselect.on("change", () => { cascadeFilterOptions(); });
       });
     }
@@ -1160,6 +1104,7 @@
       fillSelect("fmunicipio", uniq(data.map(d => d.MUNICIPIO)).sort((a,b)=>a.localeCompare(b,'es')));
       fillSelect("faro", uniq(data.map(d => d.ARO)).sort((a,b)=>a.localeCompare(b,'es')));
       fillSelect("fcodivc", uniq(data.map(d => d.CODIGO_IVC)).sort((a,b)=>String(a).localeCompare(String(b),'es')));
+      refreshSingleSelect("ftipo", uniq(data.map(d => d.TIPO)).sort((a,b)=>a.localeCompare(b,'es')));
       fillSelect("ftipoSistema", uniq(data.map(d => d.TIPO_SISTEMA_TRATAMIENTO)).sort((a,b)=>a.localeCompare(b,'es')));
       fillSelect("falgunTrat", uniq(data.map(d => String(d.ALGUN_TIPO_TRATAMIENTO))).sort((a,b)=>a.localeCompare(b,'es')));
       fillSelect("fprestador", uniq(data.map(d => d.PERSONA_PRESTADORA)).sort((a,b)=>a.localeCompare(b,'es')));
@@ -1172,7 +1117,11 @@
       const values = {};
       FILTER_IDS.forEach(id => {
         const el = document.getElementById(id);
-        values[id] = el ? el.value : "";
+        if (id === "ftipo") {
+          values[id] = el?.tomselect ? el.tomselect.getValue() : [];
+        } else {
+          values[id] = el ? el.value : "";
+        }
       });
       return values;
     }
@@ -1183,6 +1132,7 @@
         if (targetId !== "fmunicipio" && values.fmunicipio && d.MUNICIPIO !== values.fmunicipio) return false;
         if (targetId !== "faro" && values.faro && d.ARO !== values.faro) return false;
         if (targetId !== "fcodivc" && values.fcodivc && String(d.CODIGO_IVC) !== values.fcodivc) return false;
+        if (targetId !== "ftipo" && values.ftipo?.length && !values.ftipo.includes(d.TIPO)) return false;
         if (targetId !== "ftipoSistema" && values.ftipoSistema && d.TIPO_SISTEMA_TRATAMIENTO !== values.ftipoSistema) return false;
         if (targetId !== "falgunTrat" && values.falgunTrat && String(d.ALGUN_TIPO_TRATAMIENTO) !== values.falgunTrat) return false;
         if (targetId !== "fprestador" && values.fprestador && d.PERSONA_PRESTADORA !== values.fprestador) return false;
@@ -1194,28 +1144,46 @@
 
     function refreshSingleSelect(id, values, keepValue = true, allLabel = "Todos") {
       const el = document.getElementById(id);
-      const currentValue = keepValue ? el.value : "";
+      const isMulti = id === "ftipo";
+      const currentValue = keepValue
+        ? (isMulti
+            ? (el.tomselect ? el.tomselect.getValue() : [])
+            : el.value)
+        : (isMulti ? [] : "");
 
       if (selectInstances[id]) selectInstances[id].destroy();
 
-      fillSelect(id, values, allLabel);
-
-      if (currentValue && values.includes(currentValue)) {
-        document.getElementById(id).value = currentValue;
-      } else if (id === "fano" && currentValue) {
-        document.getElementById(id).value = currentValue;
+      if (isMulti) {
+        el.innerHTML = values.map(v => `<option value="${String(v).replaceAll('"','&quot;')}">${v}</option>`).join("");
       } else {
-        document.getElementById(id).value = "";
+        fillSelect(id, values, allLabel);
       }
 
-      selectInstances[id] = new TomSelect(document.getElementById(id), {
+      selectInstances[id] = new TomSelect(el, {
         create: false,
-        allowEmptyOption: true,
+        allowEmptyOption: !isMulti,
         maxOptions: 5000,
         sortField: { field: "text", direction: "asc" },
         searchField: ["text"],
-        placeholder: "Buscar o seleccionar..."
+        placeholder: isMulti ? "Seleccione uno o varios..." : "Buscar o seleccionar...",
+        plugins: isMulti ? ["remove_button"] : []
       });
+
+      if (keepValue) {
+        if (isMulti) {
+          const validValues = (Array.isArray(currentValue) ? currentValue : [currentValue])
+            .filter(v => values.includes(v));
+          if (validValues.length) selectInstances[id].setValue(validValues, true);
+        } else {
+          if (currentValue && values.includes(currentValue)) {
+            document.getElementById(id).value = currentValue;
+            selectInstances[id].setValue(currentValue, true);
+          } else if (id === "fano" && currentValue) {
+            document.getElementById(id).value = currentValue;
+            selectInstances[id].setValue(currentValue, true);
+          }
+        }
+      }
 
       document.getElementById(id).tomselect.on("change", () => { cascadeFilterOptions(); });
     }
@@ -1224,6 +1192,7 @@
       const dataMunicipio = getFilteredDataExcluding("fmunicipio");
       const dataARO = getFilteredDataExcluding("faro");
       const dataCodigo = getFilteredDataExcluding("fcodivc");
+      const dataTipoGeneral = getFilteredDataExcluding("ftipo");
       const dataTipo = getFilteredDataExcluding("ftipoSistema");
       const dataAlguno = getFilteredDataExcluding("falgunTrat");
       const dataPrestador = getFilteredDataExcluding("fprestador");
@@ -1233,6 +1202,7 @@
       refreshSingleSelect("fmunicipio", uniq(dataMunicipio.map(d => d.MUNICIPIO)).sort((a,b)=>a.localeCompare(b,'es')));
       refreshSingleSelect("faro", uniq(dataARO.map(d => d.ARO)).sort((a,b)=>a.localeCompare(b,'es')));
       refreshSingleSelect("fcodivc", uniq(dataCodigo.map(d => d.CODIGO_IVC)).sort((a,b)=>String(a).localeCompare(String(b),'es')));
+      refreshSingleSelect("ftipo", uniq(dataTipoGeneral.map(d => d.TIPO)).sort((a,b)=>a.localeCompare(b,'es')));
       refreshSingleSelect("ftipoSistema", uniq(dataTipo.map(d => d.TIPO_SISTEMA_TRATAMIENTO)).sort((a,b)=>a.localeCompare(b,'es')));
       refreshSingleSelect("falgunTrat", uniq(dataAlguno.map(d => String(d.ALGUN_TIPO_TRATAMIENTO))).sort((a,b)=>a.localeCompare(b,'es')));
       refreshSingleSelect("fprestador", uniq(dataPrestador.map(d => d.PERSONA_PRESTADORA)).sort((a,b)=>a.localeCompare(b,'es')));
@@ -1393,6 +1363,12 @@
       addChip("Municipio", document.getElementById("fmunicipio")?.value);
       addChip("ARO", document.getElementById("faro")?.value);
       addChip("Código IVC", document.getElementById("fcodivc")?.value);
+      const tiposActivos = document.getElementById("ftipo")?.tomselect
+        ? document.getElementById("ftipo").tomselect.getValue()
+        : [];
+      if (tiposActivos.length) {
+        chips.push(`<span class="active-filter-chip"><span class="label">Tipo:</span> ${tiposActivos.join(", ")}</span>`);
+      }
       addChip("Tipo sistema", document.getElementById("ftipoSistema")?.value);
       addChip("Tratamiento", document.getElementById("falgunTrat")?.value);
       addChip("Prestador", document.getElementById("fprestador")?.value);
@@ -1781,9 +1757,6 @@
       document.getElementById("mapCount").textContent = `${ptsActual.length} sistemas`;
       renderMapResumenIRCA(data);
 
-
-
-
       years.forEach(year => {
         const layer = YEAR_LAYERS[`IRCAS · ${year}`];
         data.forEach(d => {
@@ -1846,7 +1819,29 @@
       MAP_COMPARE_2025.fitBounds(bounds.pad(0.12));
     }
 
+    function classifyIRCAValue(value){
+      const n = Number(value);
+      if(!Number.isFinite(n)) return "SIN DATO";
+      if(n >= 0 && n <= 5) return "SIN RIESGO";
+      if(n > 5 && n <= 14) return "BAJO";
+      if(n > 14 && n <= 35) return "MEDIO";
+      if(n > 35 && n <= 80) return "ALTO";
+      if(n > 80) return "INVIABLE SANITARIAMENTE";
+      return "SIN DATO";
+    }
+
+    function rgbaFromHex(hex, alpha){
+      const h = String(hex || "").replace("#","").trim();
+      if(h.length !== 6) return `rgba(255,255,255,${alpha})`;
+      const r = parseInt(h.substring(0,2), 16);
+      const g = parseInt(h.substring(2,4), 16);
+      const b = parseInt(h.substring(4,6), 16);
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
     function renderKPIs(data){
+      const activeYear = chartYearFilter || document.getElementById("fano").value || "2025";
+
       const total = data.length;
       const promedio = avg(data.map(d => d.IRCA_Promedio));
       const ircaActual = avg(data.map(d => d.IRCA_ACTUAL));
@@ -1859,184 +1854,219 @@
       const alto = data.filter(d => norm(d.RIESGO_ACTUAL) === "ALTO").length;
       const inviable = data.filter(d => norm(d.RIESGO_ACTUAL) === "INVIABLE SANITARIAMENTE").length;
 
+      const totalConDatoRiesgo = sinRiesgo + bajo + medio + alto + inviable;
+
       document.getElementById("kpiSistemas").textContent = total.toLocaleString("es-CO");
       document.getElementById("kpiPromedio").textContent = promedio.toFixed(2);
       document.getElementById("kpiIRCAActual").textContent = ircaActual.toFixed(2);
       document.getElementById("kpiPoblacion").textContent = poblacion.toLocaleString("es-CO");
       document.getElementById("kpiSuscriptores").textContent = suscriptores.toLocaleString("es-CO");
 
-      document.getElementById("kpiIRCA2020").textContent = avg(data.map(d => d.IRCA_2020)).toFixed(2);
-      document.getElementById("kpiIRCA2021").textContent = avg(data.map(d => d.IRCA_2021)).toFixed(2);
-      document.getElementById("kpiIRCA2022").textContent = avg(data.map(d => d.IRCA_2022)).toFixed(2);
-      document.getElementById("kpiIRCA2023").textContent = avg(data.map(d => d.IRCA_2023)).toFixed(2);
-      document.getElementById("kpiIRCA2024").textContent = avg(data.map(d => d.IRCA_2024)).toFixed(2);
-      document.getElementById("kpiIRCA2025").textContent = avg(data.map(d => d.IRCA_2025)).toFixed(2);
+      const yearlyValues = {
+        "2020": avg(data.map(d => d.IRCA_2020)),
+        "2021": avg(data.map(d => d.IRCA_2021)),
+        "2022": avg(data.map(d => d.IRCA_2022)),
+        "2023": avg(data.map(d => d.IRCA_2023)),
+        "2024": avg(data.map(d => d.IRCA_2024)),
+        "2025": avg(data.map(d => d.IRCA_2025))
+      };
 
-      document.getElementById("kpiSinRiesgo").textContent = pct(sinRiesgo, total) + "%";
-      document.getElementById("kpiBajo").textContent = pct(bajo, total) + "%";
-      document.getElementById("kpiMedio").textContent = pct(medio, total) + "%";
-      document.getElementById("kpiAlto").textContent = pct(alto, total) + "%";
-      document.getElementById("kpiInviable").textContent = pct(inviable, total) + "%";
+      Object.entries(yearlyValues).forEach(([year, value]) => {
+        const el = document.getElementById(`kpiIRCA${year}`);
+        if(el) el.textContent = Number(value || 0).toFixed(2);
+
+        const card = el ? el.closest(".kpi-card") : null;
+        const risk = classifyIRCAValue(value);
+        const color = riskColor(risk);
+
+        if(card){
+          card.style.background = rgbaFromHex(color, 0.22);
+          card.style.border = `1px solid ${rgbaFromHex(color, 0.42)}`;
+          card.style.borderTop = `10px solid ${color}`;
+          card.style.boxShadow = "0 10px 26px rgba(0,0,0,.05)";
+        }
+
+        const riskLabelEl = document.getElementById(`kpiIRCA${year}Risk`);
+        if(riskLabelEl){
+          riskLabelEl.textContent = risk;
+          riskLabelEl.style.background = rgbaFromHex(color, 0.9);
+          riskLabelEl.style.borderColor = rgbaFromHex(color, 0.95);
+          riskLabelEl.style.color = (risk === "SIN RIESGO" || risk === "ALTO" || risk === "INVIABLE SANITARIAMENTE") ? "#ffffff" : "#111827";
+          if(risk === "INVIABLE SANITARIAMENTE"){
+            riskLabelEl.style.fontSize = ".76rem";
+          } else {
+            riskLabelEl.style.fontSize = ".88rem";
+          }
+        }
+      });
+
+      document.getElementById("kpiSinRiesgo").textContent = pct(sinRiesgo, totalConDatoRiesgo) + "%";
+      document.getElementById("kpiBajo").textContent = pct(bajo, totalConDatoRiesgo) + "%";
+      document.getElementById("kpiMedio").textContent = pct(medio, totalConDatoRiesgo) + "%";
+      document.getElementById("kpiAlto").textContent = pct(alto, totalConDatoRiesgo) + "%";
+      document.getElementById("kpiInviable").textContent = pct(inviable, totalConDatoRiesgo) + "%";
+
+      const riskTitle = document.getElementById("riskIndicatorsTitle");
+      const riskSubtitle = document.getElementById("riskIndicatorsSubtitle");
+      const riskBaseInfo = document.getElementById("riskBaseInfo");
+
+      if(riskTitle) riskTitle.textContent = `Indicadores de riesgo – año filtrado: ${activeYear}`;
+      if(riskSubtitle) riskSubtitle.textContent = "Distribución de sistemas por riesgo con base en el año activo.";
+
+      if(riskBaseInfo){
+        const tiposActivos = document.getElementById("ftipo")?.tomselect
+          ? document.getElementById("ftipo").tomselect.getValue()
+          : [];
+        const tipoTxt = tiposActivos.length ? ` · Tipo: ${tiposActivos.join(", ")}` : "";
+        riskBaseInfo.textContent =
+          `Distribución de sistemas por riesgo · base porcentual: ${totalConDatoRiesgo.toLocaleString("es-CO")} sistemas con clasificación válida${tipoTxt}`;
+      }
     }
 
     function renderRiskAnalysis(data){
-		  const years = ["2020","2021","2022","2023","2024","2025"];
+      const years = ["2020","2021","2022","2023","2024","2025"];
+      const categories = ["SIN RIESGO","BAJO","MEDIO","ALTO","INVIABLE SANITARIAMENTE"];
+      const metricMode = document.getElementById("riskMetricMode")?.value || riskMetricMode || "poblacion";
+      riskMetricMode = metricMode;
 
-		  const categories = [
-			"SIN RIESGO",
-			"BAJO",
-			"MEDIO",
-			"ALTO",
-			"INVIABLE SANITARIAMENTE"
-		  ];
+      const yearSeries = {};
+      categories.forEach(cat => yearSeries[cat] = []);
 
-		  const metricMode = document.getElementById("riskMetricMode")?.value || riskMetricMode || "poblacion";
-		  riskMetricMode = metricMode;
+      years.forEach(year => {
+        const riskField = getRiskField(year);
+        const accum = {
+          "SIN RIESGO": 0,
+          "BAJO": 0,
+          "MEDIO": 0,
+          "ALTO": 0,
+          "INVIABLE SANITARIAMENTE": 0
+        };
 
-		  const yearSeries = {};
-		  categories.forEach(cat => yearSeries[cat] = []);
+        data.forEach(d => {
+          const riesgo = norm(d[riskField] || "SIN DATO");
+          const poblacion = d.POBLACION || 0;
+          const suscriptores = d.SUSCRIPTORES || 0;
+          if (accum[riesgo] == null) return;
 
+          let valor = 0;
+          if (metricMode === "poblacion") valor = poblacion;
+          else if (metricMode === "suscriptores") valor = suscriptores;
+          else if (metricMode === "porcentaje") valor = poblacion;
 
-		  years.forEach(year => {
-			  const riskField = getRiskField(year);
+          accum[riesgo] += valor;
+        });
 
-			  const accum = {
-				"SIN RIESGO": 0,
-				"BAJO": 0,
-				"MEDIO": 0,
-				"ALTO": 0,
-				"INVIABLE SANITARIAMENTE": 0
-			  };
+        if (metricMode === "porcentaje") {
+          const totalMetric = Object.values(accum).reduce((a,b) => a + b, 0) || 1;
+          categories.forEach(cat => {
+            accum[cat] = (accum[cat] / totalMetric) * 100;
+          });
+        }
 
-			  data.forEach(d => {
-				const riesgo = norm(d[riskField] || "SIN DATO");
-				const poblacion = d.POBLACION || 0;
-				const suscriptores = d.SUSCRIPTORES || 0;
+        categories.forEach(cat => yearSeries[cat].push(accum[cat] || 0));
+      });
 
-				let valor = 0;
+      const typeValueVals = document.getElementById("ftipo")?.tomselect
+        ? document.getElementById("ftipo").tomselect.getValue()
+        : [];
+      const typeValue = typeValueVals.length ? typeValueVals.join(", ") : "Todos los sistemas";
+      const helperMap = {
+        poblacion: {
+          helper: `Distribución histórica de la población abastecida por nivel de riesgo · ${typeValue}.`,
+          subtitle: "Visualización apilada por población abastecida",
+          yTitle: "Población"
+        },
+        suscriptores: {
+          helper: `Distribución histórica de los suscriptores por nivel de riesgo · ${typeValue}.`,
+          subtitle: "Visualización apilada por suscriptores",
+          yTitle: "Suscriptores"
+        },
+        porcentaje: {
+          helper: `Distribución porcentual de la población abastecida por nivel de riesgo · ${typeValue}.`,
+          subtitle: "Visualización porcentual apilada por año",
+          yTitle: "Porcentaje (%)"
+        }
+      };
+      const helper = helperMap[metricMode] || helperMap.poblacion;
+      const helpEl = document.getElementById("riskAnalysisMetricHelp");
+      const subEl = document.getElementById("riskChartSubtitle");
+      const sumEl = document.getElementById("riskSummaryType");
+      if(helpEl) helpEl.textContent = helper.helper;
+      if(subEl) subEl.textContent = helper.subtitle;
+      if(sumEl) sumEl.textContent = `Consolidado con base en el año seleccionado en el filtro · ${typeValue}.`;
 
-				if (metricMode === "poblacion") valor = poblacion;
-				else if (metricMode === "suscriptores") valor = suscriptores;
-				else if (metricMode === "porcentaje") valor = poblacion;
+      destroyChart("chartAnalisisRiesgo");
+      charts.chartAnalisisRiesgo = new Chart(document.getElementById("chartAnalisisRiesgo"), {
+        type: "bar",
+        data: {
+          labels: years,
+          datasets: categories.map(cat => ({
+            label: cat,
+            data: yearSeries[cat],
+            backgroundColor: riskColor(cat),
+            borderColor: riskColor(cat),
+            borderWidth: 1,
+            borderRadius: 4
+          }))
+        },
+        options: {
+          maintainAspectRatio: false,
+          responsive: true,
+          plugins: {
+            legend: { position: "bottom" },
+            tooltip: {
+              callbacks: {
+                label: function(context){
+                  const value = context.raw || 0;
+                  if (metricMode === "porcentaje") return ` ${context.dataset.label}: ${Number(value).toFixed(1)}%`;
+                  return ` ${context.dataset.label}: ${Number(value).toLocaleString("es-CO")}`;
+                }
+              }
+            },
+            datalabels: { display: false }
+          },
+          scales: {
+            x: { stacked: true },
+            y: {
+              stacked: true,
+              beginAtZero: true,
+              max: metricMode === "porcentaje" ? 100 : undefined,
+              title: { display: true, text: helper.yTitle },
+              ticks: {
+                callback: value => metricMode === "porcentaje"
+                  ? Number(value).toFixed(0) + "%"
+                  : Number(value).toLocaleString("es-CO")
+              }
+            }
+          }
+        }
+      });
 
-				if (accum[riesgo] != null) accum[riesgo] += valor;
-			  });
+      const activeYear = chartYearFilter || document.getElementById("fano").value || "2025";
+      const riskField = getRiskField(activeYear);
+      let pobSinRiesgo = 0;
+      let pobEnRiesgo = 0;
+      let suscriptoresEnRiesgo = 0;
+      let pobTotal = 0;
 
-			  if (metricMode === "porcentaje") {
-				const totalMetric = Object.values(accum).reduce((a,b) => a + b, 0) || 1;
-				categories.forEach(cat => {
-				  accum[cat] = (accum[cat] / totalMetric) * 100;
-				});
-			  }
+      data.forEach(d => {
+        const riesgo = norm(d[riskField] || "SIN DATO");
+        const poblacion = d.POBLACION || 0;
+        const suscriptores = d.SUSCRIPTORES || 0;
+        pobTotal += poblacion;
+        if (riesgo === "SIN RIESGO" || riesgo === "BAJO" || riesgo === "MEDIO") pobSinRiesgo += poblacion;
+        if (riesgo === "ALTO" || riesgo === "INVIABLE SANITARIAMENTE") {
+          pobEnRiesgo += poblacion;
+          suscriptoresEnRiesgo += suscriptores;
+        }
+      });
 
-			  categories.forEach(cat => {
-				yearSeries[cat].push(accum[cat] || 0);
-			  });
-			});
-
-
-
-		  let yTitle = "Población";
-		  let stacked100 = false;
-
-		  if (metricMode === "suscriptores") yTitle = "Suscriptores";
-		  if (metricMode === "porcentaje") {
-			yTitle = "Porcentaje (%)";
-			stacked100 = true;
-		  }
-
-		  destroyChart("chartAnalisisRiesgo");
-		  charts.chartAnalisisRiesgo = new Chart(document.getElementById("chartAnalisisRiesgo"), {
-			type: "bar",
-			data: {
-			  labels: years,
-			  datasets: categories.map(cat => ({
-				label: cat,
-				data: yearSeries[cat],
-				backgroundColor: riskColor(cat),
-				borderColor: riskColor(cat),
-				borderWidth: 1,
-				borderRadius: 4
-			  }))
-			},
-			options: {
-			  maintainAspectRatio: false,
-			  responsive: true,
-			  plugins: {
-				legend: { position: "bottom" },
-				tooltip: {
-				  callbacks: {
-					label: function(context){
-					  const value = context.raw || 0;
-					  if (metricMode === "porcentaje") {
-						return ` ${context.dataset.label}: ${Number(value).toFixed(1)}%`;
-					  }
-					  return ` ${context.dataset.label}: ${Number(value).toLocaleString("es-CO")}`;
-					}
-				  }
-				},
-				datalabels: { display: false }
-			  },
-			  scales: {
-				x: { stacked: true },
-				y: {
-				  stacked: true,
-				  beginAtZero: true,
-				  max: stacked100 ? 100 : undefined,
-				  title: {
-					display: true,
-					text: yTitle
-				  },
-				  ticks: {
-					callback: value => {
-					  if (metricMode === "porcentaje") return Number(value).toFixed(0) + "%";
-					  return Number(value).toLocaleString("es-CO");
-					}
-				  }
-				}
-			  }
-			}
-		  });
-
-		  const activeYear = chartYearFilter || document.getElementById("fano").value || "2025";
-		  const riskField = getRiskField(activeYear);
-
-		  let pobSinRiesgo = 0;
-		  let pobEnRiesgo = 0;
-		  let suscriptoresEnRiesgo = 0;
-		  let pobTotal = 0;
-
-		  data.forEach(d => {
-			const riesgo = norm(d[riskField] || "SIN DATO");
-			const poblacion = d.POBLACION || 0;
-			const suscriptores = d.SUSCRIPTORES || 0;
-
-			pobTotal += poblacion;
-
-			if (riesgo === "SIN RIESGO" || riesgo === "BAJO" || riesgo === "MEDIO") {
-			  pobSinRiesgo += poblacion;
-			}
-
-			if (riesgo === "ALTO" || riesgo === "INVIABLE SANITARIAMENTE") {
-			  pobEnRiesgo += poblacion;
-			  suscriptoresEnRiesgo += suscriptores;
-			}
-		  });
-
-		  const pctPobRiesgo = pobTotal ? ((pobEnRiesgo / pobTotal) * 100) : 0;
-
-		  document.getElementById("riskKpiPobSinRiesgo").textContent = pobSinRiesgo.toLocaleString("es-CO");
-		  document.getElementById("riskKpiPobEnRiesgo").textContent = pobEnRiesgo.toLocaleString("es-CO");
-		  document.getElementById("riskKpiSuscriptoresRiesgo").textContent = suscriptoresEnRiesgo.toLocaleString("es-CO");
-		  document.getElementById("riskKpiPctPobRiesgo").textContent = pctPobRiesgo.toFixed(1) + "%";
-		
-	}
-
-
-
-
-
-
+      const pctPobRiesgo = pobTotal ? ((pobEnRiesgo / pobTotal) * 100) : 0;
+      document.getElementById("riskKpiPobSinRiesgo").textContent = pobSinRiesgo.toLocaleString("es-CO");
+      document.getElementById("riskKpiPobEnRiesgo").textContent = pobEnRiesgo.toLocaleString("es-CO");
+      document.getElementById("riskKpiSuscriptoresRiesgo").textContent = suscriptoresEnRiesgo.toLocaleString("es-CO");
+      document.getElementById("riskKpiPctPobRiesgo").textContent = pctPobRiesgo.toFixed(1) + "%";
+    }
 
     function computePriority(d){
       const risk = norm(d.RIESGO_ACTUAL || "SIN DATO");
@@ -2048,7 +2078,23 @@
       return Number.isFinite(score) ? score : 0;
     }
 
-    function renderAnalytics(data){
+    
+    function priorityBand(score){
+      const n = Number(score || 0);
+      if(n >= 8) return { label:"Muy alta", color:"#ef4444", bg:"rgba(239,68,68,.12)" };
+      if(n >= 6) return { label:"Alta", color:"#f59e0b", bg:"rgba(245,158,11,.14)" };
+      if(n >= 4) return { label:"Media", color:"#eab308", bg:"rgba(234,179,8,.16)" };
+      return { label:"Baja", color:"#22c55e", bg:"rgba(34,197,94,.12)" };
+    }
+
+    function cleanDisplayText(v){
+      return String(v == null ? "" : v)
+        .replace(/�/g, "")
+        .replace(/\s+/g, " ")
+        .trim() || "-";
+    }
+
+function renderAnalytics(data){
       const criticalSystems = data.filter(d => {
         const r = norm(d.RIESGO_ACTUAL || "SIN DATO");
         return r === "ALTO" || r === "INVIABLE SANITARIAMENTE";
@@ -2100,15 +2146,25 @@
         ? alerts.map(a => `<div class="analytic-alert">${a}</div>`).join("")
         : `<div class="analytic-alert" style="border-left-color:#16a34a;background:#f6fff8;">No se detectaron alertas prioritarias con los filtros actuales.</div>`;
 
-      const topSystems = [...data].map(d => ({...d, PRIORIDAD: computePriority(d)})).sort((a,b)=>b.PRIORIDAD-a.PRIORIDAD).slice(0,10);
-      document.getElementById("anaTopSistemas").innerHTML = topSystems.map(d => `
+      const topSystems = [...data]
+        .map(d => ({...d, PRIORIDAD: computePriority(d)}))
+        .sort((a,b)=>b.PRIORIDAD-a.PRIORIDAD)
+        .slice(0,10);
+
+      document.getElementById("anaTopSistemas").innerHTML = topSystems.map(d => {
+        const band = priorityBand(d.PRIORIDAD);
+        return `
         <tr>
-          <td>${(d.PERSONA_PRESTADORA || "-").slice(0,30)}</td>
-          <td>${d.MUNICIPIO || "-"}</td>
-          <td>${Number(d.IRCA_ACTUAL || 0).toFixed(2)}</td>
-          <td>${d.PRIORIDAD.toFixed(2)}</td>
+          <td class="col-prestador">${cleanDisplayText(d.PERSONA_PRESTADORA || "-")}</td>
+          <td class="col-municipio">${cleanDisplayText(d.MUNICIPIO || "-")}</td>
+          <td class="col-irca">${Number(d.IRCA_ACTUAL || 0).toFixed(2)}</td>
+          <td class="col-prioridad">
+            ${d.PRIORIDAD.toFixed(2)}
+            <span class="priority-pill" style="color:${band.color}; background:${band.bg}; border-color:${band.color}33;">${band.label}</span>
+          </td>
         </tr>
-      `).join("");
+      `;
+      }).join("");
 
       const muniMap = {};
       data.forEach(d => {
@@ -2355,6 +2411,10 @@
         if(document.getElementById("fmunicipio").value && d.MUNICIPIO !== document.getElementById("fmunicipio").value) return false;
         if(document.getElementById("faro").value && d.ARO !== document.getElementById("faro").value) return false;
         if(document.getElementById("fcodivc").value && String(d.CODIGO_IVC) !== document.getElementById("fcodivc").value) return false;
+        const tiposSeleccionados = document.getElementById("ftipo")?.tomselect
+          ? document.getElementById("ftipo").tomselect.getValue()
+          : [];
+        if (tiposSeleccionados.length && !tiposSeleccionados.includes(d.TIPO)) return false;
         if(document.getElementById("ftipoSistema").value && d.TIPO_SISTEMA_TRATAMIENTO !== document.getElementById("ftipoSistema").value) return false;
         if(document.getElementById("falgunTrat").value && String(d.ALGUN_TIPO_TRATAMIENTO) !== document.getElementById("falgunTrat").value) return false;
         if(document.getElementById("fprestador").value && d.PERSONA_PRESTADORA !== document.getElementById("fprestador").value) return false;
@@ -2374,15 +2434,15 @@
         ANO_ACTUAL: year
       }));
 
-		renderKPIs(LIST);
-		renderRiskAnalysis(LIST);
-		renderMainMap(LIST);
-		refreshMunicipioHighlight();
-		renderCompareMaps(LIST);
-		renderAnalytics(LIST);
-		renderCharts(LIST);
-		renderTable(LIST);
-		renderActiveFilters();
+      renderKPIs(LIST);
+      renderRiskAnalysis(LIST);
+      renderMainMap(LIST);
+      refreshMunicipioHighlight();
+      renderCompareMaps(LIST);
+      renderAnalytics(LIST);
+      renderCharts(LIST);
+      renderTable(LIST);
+      renderActiveFilters();
 
       if(selectedMunicipioBounds){
         MAP.fitBounds(selectedMunicipioBounds.pad(0.15));
@@ -2423,12 +2483,15 @@
       mapRiskBadgeFilter = "";
 
       document.getElementById("fano").value = "2025";
-      ["fmunicipio","faro","fcodivc","ftipoSistema","falgunTrat","fprestador","fformaOrg","fpuntoToma"]
+      ["fmunicipio","faro","fcodivc","ftipo","ftipoSistema","falgunTrat","fprestador","fformaOrg","fpuntoToma"]
         .forEach(id => {
           const el = document.getElementById(id);
           if(el){
-            el.value = "";
-            if(el.tomselect) el.tomselect.setValue("", true);
+            if(el.tomselect){
+              el.tomselect.clear(true);
+            } else {
+              el.value = "";
+            }
           }
         });
 
@@ -2443,12 +2506,15 @@
       mapRiskBadgeFilter = "";
 
       document.getElementById("fano").value = "2025";
-      ["fmunicipio","faro","fcodivc","ftipoSistema","falgunTrat","fprestador","fformaOrg","fpuntoToma"]
+      ["fmunicipio","faro","fcodivc","ftipo","ftipoSistema","falgunTrat","fprestador","fformaOrg","fpuntoToma"]
         .forEach(id => {
           const el = document.getElementById(id);
           if(el){
-            el.value = "";
-            if(el.tomselect) el.tomselect.setValue("", true);
+            if(el.tomselect){
+              el.tomselect.clear(true);
+            } else {
+              el.value = "";
+            }
           }
         });
 
@@ -2457,11 +2523,11 @@
     });
 
     document.getElementById("btnCargar").addEventListener("click", loadData);
-	
-	document.getElementById("riskMetricMode")?.addEventListener("change", () => {
-		riskMetricMode = document.getElementById("riskMetricMode").value || "poblacion";
-		renderRiskAnalysis(LIST);
-	});
+    document.getElementById("riskMetricMode")?.addEventListener("change", () => {
+      riskMetricMode = document.getElementById("riskMetricMode").value || "poblacion";
+      renderRiskAnalysis(LIST);
+    });
+
     initMainMap();
     initCustomLayerPanel();
     initBasemapControls();
@@ -2471,4 +2537,157 @@
   </script>
 </body>
 </html>
+<section class="soft-card p-3 mb-4">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+          <div>
+            <h5 class="mb-1">Analítica de priorización y seguimiento</h5>
+            <div class="section-note">Bloque analítico posterior al componente espacial. Fase 1 implementada; Fases 2 y 3 listas para crecer.</div>
+          </div>
+        </div>
 
+        <div class="row g-4 mb-3">
+          <div class="col-12 col-xl-4">
+            <div class="analytic-card p-3 h-100">
+              <div class="analytic-phase-title">Fase 1 · Ejecutiva</div>
+              <div class="analytic-mini mb-3">Priorización, población expuesta, alertas y rankings.</div>
+
+              <div class="row g-3 mb-3">
+                <div class="col-6">
+                  <div class="kpi-card p-3">
+                    <div class="kpi-label">Sistemas críticos</div>
+                    <div id="anaKpiCriticos" class="kpi-value">–</div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="kpi-card p-3">
+                    <div class="kpi-label">Población riesgo ≥ medio</div>
+                    <div id="anaKpiPobRiesgo" class="kpi-value">–</div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="kpi-card p-3">
+                    <div class="kpi-label">Población alto/inviable</div>
+                    <div id="anaKpiPobAlta" class="kpi-value">–</div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="kpi-card p-3">
+                    <div class="kpi-label">Sistemas sin tratamiento</div>
+                    <div id="anaKpiSinTrat" class="kpi-value">–</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="analytic-phase-title mb-2">Alertas automáticas</div>
+              <div id="anaAlertas"></div>
+            </div>
+          </div>
+
+          <div class="col-12 col-xl-4">
+            <div class="analytic-card p-3 h-100">
+              <div class="analytic-phase-title">Top 10 sistemas críticos</div>
+              <div class="analytic-mini mb-2">Ranking de sistemas priorizados con base en riesgo sanitario, población y condición de tratamiento.</div>
+
+              <div class="analytic-method-box mb-3">
+                <div class="analytic-method-title">¿Cómo se calcula?</div>
+                <div class="analytic-method-text">
+                  El indicador de prioridad del sistema se construye combinando:
+                  <b>nivel de riesgo IRCA del año activo</b>,
+                  <b>población abastecida</b> y
+                  <b>condición de tratamiento</b>.
+                </div>
+                <div class="analytic-formula mt-2">
+                  Prioridad = factor de riesgo × log10(población + 1) × factor de tratamiento
+                </div>
+                <div class="analytic-method-list mt-2">
+                  <div><b>Factor de riesgo:</b> Sin riesgo = 0, Bajo = 1, Medio = 2, Alto = 3, Inviable = 4.</div>
+                  <div><b>Factor de tratamiento:</b> aumenta cuando el sistema no reporta tratamiento.</div>
+                  <div><b>Interpretación:</b> a mayor valor, mayor prioridad de atención.</div>
+                  <div><b>Rangos operativos del score:</b> Muy alta ≥ 8, Alta = 6–7.99, Media = 4–5.99, Baja &lt; 4.</div>
+                </div>
+              </div>
+
+              <div class="table-responsive">
+                <table class="table table-sm analytic-table">
+                  <thead>
+                    <tr>
+                      <th class="col-prestador">Prestador</th>
+                      <th class="col-municipio">Municipio</th>
+                      <th class="col-irca">IRCA</th>
+                      <th class="col-prioridad">Prioridad</th>
+                    </tr>
+                  </thead>
+                  <tbody id="anaTopSistemas"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-xl-4">
+            <div class="analytic-card p-3 h-100">
+              <div class="analytic-phase-title">Top 10 municipios críticos</div>
+              <div class="analytic-mini mb-2">Ranking municipal a partir de la criticidad agregada de sus sistemas y la población expuesta.</div>
+
+              <div class="analytic-method-box mb-3">
+                <div class="analytic-method-title">¿Cómo se calcula?</div>
+                <div class="analytic-method-text">
+                  El indicador municipal consolida la situación del municipio combinando:
+                  <b>promedio IRCA</b>,
+                  <b>población expuesta en riesgo medio o superior</b> y
+                  <b>suma de prioridades de los sistemas filtrados</b>.
+                </div>
+                <div class="analytic-formula mt-2">
+                  Score municipal = suma de prioridades de sistemas + presión poblacional en riesgo
+                </div>
+                <div class="analytic-method-list mt-2">
+                  <div><b>IRCA promedio:</b> describe el comportamiento general del municipio.</div>
+                  <div><b>Población en riesgo:</b> cuantifica el impacto potencial sobre la población abastecida.</div>
+                  <div><b>Interpretación:</b> a mayor score, mayor criticidad municipal.</div>
+                </div>
+              </div>
+
+              <div class="table-responsive">
+                <table class="table table-sm analytic-table">
+                  <thead>
+                    <tr>
+                      <th>Municipio</th>
+                      <th>IRCA prom.</th>
+                      <th>Pob. riesgo</th>
+                      <th>Score</th>
+                    </tr>
+                  </thead>
+                  <tbody id="anaTopMunicipios"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-4">
+          <div class="col-12 col-lg-6">
+            <div class="analytic-card p-3 h-100">
+              <div class="analytic-phase-title">Fase 2 · Territorial</div>
+              <div class="analytic-mini mb-3">Preparada para cruces con capas territoriales.</div>
+              <div class="analytic-placeholder">
+                Este bloque está listo para crecer con analítica espacial, como:
+                cruce con sedes educativas, centros poblados, ríos, vías principales,
+                veredas y fichas territoriales por municipio.
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-6">
+            <div class="analytic-card p-3 h-100">
+              <div class="analytic-phase-title">Fase 3 · Predictiva y seguimiento</div>
+              <div class="analytic-mini mb-3">Preparada para tendencia y proyección.</div>
+              <div class="analytic-placeholder">
+                Este bloque está listo para incorporar:
+                tendencia por sistema, mejora/empeora/estable, cobertura del dato,
+                proyección simple del IRCA y seguimiento institucional de intervenciones.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      

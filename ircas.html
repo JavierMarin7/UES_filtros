@@ -158,6 +158,72 @@
       box-shadow:0 4px 10px rgba(0,0,0,.18);
     }
 
+    #mapResumenIRCA{
+      text-align:left !important;
+      padding:14px 16px !important;
+      border-radius:1rem !important;
+    }
+
+    .map-summary-line{
+      font-size:1rem;
+      color:#344054;
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      line-height:1.45;
+    }
+
+    .map-summary-line strong{
+      color:#22314d;
+      font-weight:800;
+    }
+
+    .map-summary-label{
+      margin-top:10px;
+      margin-bottom:6px;
+      font-size:.9rem;
+      color:#475467;
+      font-weight:700;
+      text-align:center;
+    }
+
+    .map-summary-chips{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      justify-content:center;
+      align-items:center;
+    }
+
+    .treatment-badge{
+      display:inline-block;
+      margin:2px 4px;
+      padding:6px 12px;
+      border-radius:999px;
+      font-size:.84rem;
+      font-weight:700;
+      line-height:1.2;
+      border:1px solid rgba(0,0,0,.08);
+      transition:transform .15s ease, box-shadow .15s ease, outline .15s ease;
+      cursor:pointer;
+    }
+
+    .treatment-badge-active{
+      outline:3px solid #22314d;
+      transform:translateY(-1px);
+      box-shadow:0 4px 10px rgba(0,0,0,.15);
+    }
+
+    .map-summary-subnote{
+      margin-top:8px;
+      font-size:.82rem;
+      color:#667085;
+      text-align:center;
+    }
+
     .layer-toggle-btn{
       position:absolute;
       top:12px;
@@ -284,6 +350,60 @@
       box-shadow: 0 1px 4px rgba(0,0,0,.08);
     }
 
+
+    .vereda-label div{
+      background: rgba(255,255,255,0.68);
+      color: #475467;
+      border: 1px solid rgba(71,84,103,.14);
+      border-radius: 6px;
+      padding: 1px 5px;
+      font-size: 9px;
+      font-weight: 600;
+      white-space: nowrap;
+      box-shadow: 0 1px 3px rgba(0,0,0,.06);
+    }
+
+    .legend-toggle-btn{
+      position:absolute;
+      bottom:12px;
+      left:12px;
+      z-index:520;
+      width:42px;
+      height:42px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:#fff;
+      border:1px solid rgba(0,0,0,.08);
+      border-radius:10px;
+      box-shadow:0 8px 20px rgba(0,0,0,.15);
+      cursor:pointer;
+      color:#475467;
+    }
+
+    .legend-toggle-btn:hover{ background:#f8fafc; }
+    .legend-toggle-btn svg{ width:22px; height:22px; }
+
+    .custom-legend-panel{
+      position:absolute;
+      bottom:12px;
+      left:12px;
+      z-index:530;
+      width:245px;
+      background:#fff;
+      border:1px solid rgba(0,0,0,.08);
+      border-radius:14px;
+      box-shadow:0 8px 24px rgba(0,0,0,.18);
+      padding:10px 12px;
+      transition:opacity .18s ease, transform .18s ease;
+    }
+
+    .custom-legend-panel.collapsed{
+      opacity:0;
+      pointer-events:none;
+      transform:translateY(6px) scale(.98);
+    }
+
     .analytic-phase-title{
       font-size:1rem; font-weight:800; color:#1f2937; margin-bottom:.4rem;
     }
@@ -298,46 +418,6 @@
       text-transform:uppercase;
       color:#667085;
       border-bottom:1px solid #e5e7eb;
-    }
-
-    .analytic-table{
-      table-layout: fixed;
-      width: 100%;
-    }
-    .analytic-table td{
-      vertical-align: top;
-      word-break: break-word;
-      white-space: normal;
-    }
-    .analytic-table .col-prestador{
-      width: 54%;
-      min-width: 0;
-      font-weight: 600;
-    }
-    .analytic-table .col-municipio{
-      width: 18%;
-    }
-    .analytic-table .col-irca{
-      width: 12%;
-      text-align: right;
-      font-variant-numeric: tabular-nums;
-    }
-    .analytic-table .col-prioridad{
-      width: 16%;
-      text-align: right;
-      font-variant-numeric: tabular-nums;
-    }
-    .priority-pill{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      padding:4px 8px;
-      border-radius:999px;
-      font-size:.74rem;
-      font-weight:800;
-      border:1px solid rgba(0,0,0,.08);
-      margin-left:6px;
-      white-space:nowrap;
     }
     .analytic-alert{
       border-left:4px solid #ef4444;
@@ -822,7 +902,24 @@
             </details>
           </div>
 
-          <div id="legend" class="legend position-absolute" style="bottom:12px; left:12px; z-index:401;"></div>
+          
+          <div id="legendToggle" class="legend-toggle-btn" title="Leyenda del mapa">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M5 6h14M5 12h14M5 18h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              <circle cx="8" cy="6" r="1.8" fill="currentColor"/>
+              <circle cx="12" cy="12" r="1.8" fill="currentColor"/>
+              <circle cx="16" cy="18" r="1.8" fill="currentColor"/>
+            </svg>
+          </div>
+
+          <div id="legendPanel" class="custom-legend-panel collapsed">
+            <div class="layer-panel-header d-flex justify-content-between align-items-center">
+              <span>Leyenda</span>
+              <button id="legendClose" class="layer-close-btn" type="button" aria-label="Cerrar leyenda">×</button>
+            </div>
+            <div id="legend"></div>
+          </div>
+
         </div>
 
         <div id="mapResumenIRCA" class="mt-3 p-2 text-center bg-white rounded shadow-sm"
@@ -849,7 +946,157 @@
         </div>
       </section>
 
-      
+      <section class="soft-card p-3 mb-4">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+          <div>
+            <h5 class="mb-1">Analítica de priorización y seguimiento</h5>
+            <div class="section-note">Bloque analítico posterior al componente espacial. Fase 1 implementada; Fases 2 y 3 listas para crecer.</div>
+          </div>
+        </div>
+
+        <div class="row g-4 mb-3">
+          <div class="col-12 col-xl-4">
+            <div class="analytic-card p-3 h-100">
+              <div class="analytic-phase-title">Fase 1 · Ejecutiva</div>
+              <div class="analytic-mini mb-3">Priorización, población expuesta, alertas y rankings.</div>
+
+              <div class="row g-3 mb-3">
+                <div class="col-6">
+                  <div class="kpi-card p-3">
+                    <div class="kpi-label">Sistemas críticos</div>
+                    <div id="anaKpiCriticos" class="kpi-value">–</div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="kpi-card p-3">
+                    <div class="kpi-label">Población riesgo ≥ medio</div>
+                    <div id="anaKpiPobRiesgo" class="kpi-value">–</div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="kpi-card p-3">
+                    <div class="kpi-label">Población alto/inviable</div>
+                    <div id="anaKpiPobAlta" class="kpi-value">–</div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="kpi-card p-3">
+                    <div class="kpi-label">Sistemas sin tratamiento</div>
+                    <div id="anaKpiSinTrat" class="kpi-value">–</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="analytic-phase-title mb-2">Alertas automáticas</div>
+              <div id="anaAlertas"></div>
+            </div>
+          </div>
+
+          <div class="col-12 col-xl-4">
+            <div class="analytic-card p-3 h-100">
+              <div class="analytic-phase-title">Top 10 sistemas críticos</div>
+              <div class="analytic-mini mb-2">Ranking de sistemas priorizados con base en riesgo sanitario, población y condición de tratamiento.</div>
+
+              <div class="analytic-method-box mb-3">
+                <div class="analytic-method-title">¿Cómo se calcula?</div>
+                <div class="analytic-method-text">
+                  El indicador de prioridad del sistema se construye combinando:
+                  <b>nivel de riesgo IRCA del año activo</b>,
+                  <b>población abastecida</b> y
+                  <b>condición de tratamiento</b>.
+                </div>
+                <div class="analytic-formula mt-2">
+                  Prioridad = factor de riesgo × log10(población + 1) × factor de tratamiento
+                </div>
+                <div class="analytic-method-list mt-2">
+                  <div><b>Factor de riesgo:</b> Sin riesgo = 0, Bajo = 1, Medio = 2, Alto = 3, Inviable = 4.</div>
+                  <div><b>Factor de tratamiento:</b> aumenta cuando el sistema no reporta tratamiento.</div>
+                  <div><b>Interpretación:</b> a mayor valor, mayor prioridad de atención.</div>
+                </div>
+              </div>
+
+              <div class="table-responsive">
+                <table class="table table-sm analytic-table">
+                  <thead>
+                    <tr>
+                      <th>Prestador</th>
+                      <th>Municipio</th>
+                      <th>IRCA</th>
+                      <th>Prioridad</th>
+                    </tr>
+                  </thead>
+                  <tbody id="anaTopSistemas"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-xl-4">
+            <div class="analytic-card p-3 h-100">
+              <div class="analytic-phase-title">Top 10 municipios críticos</div>
+              <div class="analytic-mini mb-2">Ranking municipal a partir de la criticidad agregada de sus sistemas y la población expuesta.</div>
+
+              <div class="analytic-method-box mb-3">
+                <div class="analytic-method-title">¿Cómo se calcula?</div>
+                <div class="analytic-method-text">
+                  El indicador municipal consolida la situación del municipio combinando:
+                  <b>promedio IRCA</b>,
+                  <b>población expuesta en riesgo medio o superior</b> y
+                  <b>suma de prioridades de los sistemas filtrados</b>.
+                </div>
+                <div class="analytic-formula mt-2">
+                  Score municipal = suma de prioridades de sistemas + presión poblacional en riesgo
+                </div>
+                <div class="analytic-method-list mt-2">
+                  <div><b>IRCA promedio:</b> describe el comportamiento general del municipio.</div>
+                  <div><b>Población en riesgo:</b> cuantifica el impacto potencial sobre la población abastecida.</div>
+                  <div><b>Interpretación:</b> a mayor score, mayor criticidad municipal.</div>
+                </div>
+              </div>
+
+              <div class="table-responsive">
+                <table class="table table-sm analytic-table">
+                  <thead>
+                    <tr>
+                      <th>Municipio</th>
+                      <th>IRCA prom.</th>
+                      <th>Pob. riesgo</th>
+                      <th>Score</th>
+                    </tr>
+                  </thead>
+                  <tbody id="anaTopMunicipios"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-4">
+          <div class="col-12 col-lg-6">
+            <div class="analytic-card p-3 h-100">
+              <div class="analytic-phase-title">Fase 2 · Territorial</div>
+              <div class="analytic-mini mb-3">Preparada para cruces con capas territoriales.</div>
+              <div class="analytic-placeholder">
+                Este bloque está listo para crecer con analítica espacial, como:
+                cruce con sedes educativas, centros poblados, ríos, vías principales,
+                veredas y fichas territoriales por municipio.
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-6">
+            <div class="analytic-card p-3 h-100">
+              <div class="analytic-phase-title">Fase 3 · Predictiva y seguimiento</div>
+              <div class="analytic-mini mb-3">Preparada para tendencia y proyección.</div>
+              <div class="analytic-placeholder">
+                Este bloque está listo para incorporar:
+                tendencia por sistema, mejora/empeora/estable, cobertura del dato,
+                proyección simple del IRCA y seguimiento institucional de intervenciones.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <section class="row g-4 mb-4">
         <div class="col-12">
@@ -955,14 +1202,17 @@
     let BASEMAPS = {};
     let currentBasemap = null;
     let MUNICIPIOS_VALLE_LABELS = null;
+    let VEREDAS_VALLE_LABELS = null;
     let RIOS_LABELS = null;
     let MUNICIPIOS_VALLE_LAYER_REF = null;
+    let VEREDAS_VALLE_LAYER_REF = null;
     let selectedMunicipioBounds = null;
 
     let chartRiskFilter = "";
     let chartMunicipioFilter = "";
     let chartYearFilter = "";
     let mapRiskBadgeFilter = "";
+    let mapTreatmentBadgeFilter = "";
     let riskMetricMode = "poblacion";
 
     let MAP;
@@ -1008,6 +1258,16 @@
 
     function riskFactor(risk){
       return RISK_FACTORS[norm(risk)] ?? 0;
+    }
+
+    function getMunicipioFeatureName(props){
+      const p = props || {};
+      return p.MPIO_CNMBR || p.MUNICIPIO || p.NOM_MUN || p.NOMBRE || p.MPIO || p.NAME || "";
+    }
+
+    function getVeredaFeatureName(props){
+      const p = props || {};
+      return p.NOMBRE_VER || p.NOMBRE || "";
     }
 
     function getIRCAField(year){ return `IRCA_${year}`; }
@@ -1272,7 +1532,7 @@
 
       layerRef.eachFeature(function(featureLayer){
         const p = featureLayer.feature?.properties || {};
-        const nombre = p.MUNICIPIO || p.NOM_MUN || p.NOMBRE || p.MPIO || p.NAME || "";
+        const nombre = getMunicipioFeatureName(p);
         if(!nombre) return;
 
         let center = null;
@@ -1290,12 +1550,53 @@
           interactive: false,
           icon: L.divIcon({
             className: 'municipio-label',
-            html: `<div style="${isSelected ? 'background:rgba(219,234,254,.95);border:1px solid #2563eb;color:#1d4ed8;font-size:12px;font-weight:800;' : ''}">${nombre}</div>`
+            html: `<div style="${isSelected ? 'background:rgba(254,240,138,.95);border:1px solid #f59e0b;color:#92400e;font-size:12px;font-weight:800;' : ''}">${nombre}</div>`
           })
         });
 
         MUNICIPIOS_VALLE_LABELS.addLayer(label);
       });
+    }
+
+    function renderVeredasValleLabels(layerRef){
+      if(!VEREDAS_VALLE_LABELS) return;
+      VEREDAS_VALLE_LABELS.clearLayers();
+
+      layerRef.eachFeature(function(featureLayer){
+        const p = featureLayer.feature?.properties || {};
+        const nombre = getVeredaFeatureName(p);
+        if(!nombre) return;
+
+        let center = null;
+        if(featureLayer.getBounds){
+          const b = featureLayer.getBounds();
+          if(b && b.isValid()) center = b.getCenter();
+        }
+        if(!center) return;
+
+        const label = L.marker(center, {
+          interactive: false,
+          icon: L.divIcon({
+            className: 'vereda-label',
+            html: `<div>${nombre}</div>`
+          })
+        });
+
+        VEREDAS_VALLE_LABELS.addLayer(label);
+      });
+    }
+
+    function updateVeredaLabelsVisibility(){
+      if(!MAP || !VEREDAS_VALLE_LABELS) return;
+      const zoomThreshold = 12;
+      const veredasCheck = document.querySelector('#layerPanel input[data-layer="veredasValle"]');
+      const labelsEnabledByLayer = !!(veredasCheck && veredasCheck.checked);
+
+      if(labelsEnabledByLayer && MAP.getZoom() >= zoomThreshold){
+        if(!MAP.hasLayer(VEREDAS_VALLE_LABELS)) MAP.addLayer(VEREDAS_VALLE_LABELS);
+      } else {
+        if(MAP.hasLayer(VEREDAS_VALLE_LABELS)) MAP.removeLayer(VEREDAS_VALLE_LABELS);
+      }
     }
 
     function renderRiosLabels(layerRef){
@@ -1331,14 +1632,14 @@
 
       MUNICIPIOS_VALLE_LAYER_REF.eachFeature(function(featureLayer){
         const p = featureLayer.feature?.properties || {};
-        const nombre = p.MUNICIPIO || p.NOM_MUN || p.NOMBRE || p.MPIO || p.NAME || "";
+        const nombre = getMunicipioFeatureName(p);
         const isSelected = selectedMunicipio && norm(nombre) === norm(selectedMunicipio);
 
         featureLayer.setStyle({
-          color: isSelected ? "#1d4ed8" : "#8b5cf6",
-          weight: isSelected ? 4 : 2.2,
-          fillColor: isSelected ? "#93c5fd" : "#c4b5fd",
-          fillOpacity: isSelected ? 0.18 : 0.05
+          color: isSelected ? "#d97706" : "#8b5cf6",
+          weight: isSelected ? 4.5 : 2.2,
+          fillColor: isSelected ? "#facc15" : "#c4b5fd",
+          fillOpacity: isSelected ? 0.28 : 0.05
         });
 
         if(isSelected && featureLayer.getBounds){
@@ -1377,6 +1678,7 @@
       if(chartMunicipioFilter) chips.push(`<span class="active-filter-chip"><span class="label">Gráfico municipio:</span> ${chartMunicipioFilter}</span>`);
       if(chartRiskFilter) chips.push(`<span class="active-filter-chip"><span class="label">Gráfico riesgo:</span> ${chartRiskFilter}</span>`);
       if(mapRiskBadgeFilter) chips.push(`<span class="active-filter-chip"><span class="label">Mapa riesgo:</span> ${mapRiskBadgeFilter}</span>`);
+      if(mapTreatmentBadgeFilter) chips.push(`<span class="active-filter-chip"><span class="label">Tratamiento mapa:</span> ${mapTreatmentBadgeFilter}</span>`);
 
       wrap.innerHTML = chips.length ? chips.join("") : `<span class="text-muted">Sin filtros activos</span>`;
     }
@@ -1425,7 +1727,7 @@
         url: URL_MUNICIPIO_VALLE,
         style: function(feature){
           const p = feature?.properties || {};
-          const nombre = p.MUNICIPIO || p.NOM_MUN || p.NOMBRE || p.MPIO || p.NAME || "";
+          const nombre = getMunicipioFeatureName(p);
           const seleccionado = document.getElementById("fmunicipio")?.value || "";
           const isSelected = seleccionado && norm(nombre) === norm(seleccionado);
           return {
@@ -1449,6 +1751,13 @@
           fillColor:"#f5f6f7",
           fillOpacity:0.02
         }
+      });
+
+      VEREDAS_VALLE_LAYER_REF = veredasValle;
+      VEREDAS_VALLE_LABELS = L.layerGroup();
+      veredasValle.on('load', function(){
+        renderVeredasValleLabels(veredasValle);
+        updateVeredaLabelsVisibility();
       });
 
       const centrosPoblados = L.esri.featureLayer({
@@ -1487,16 +1796,6 @@
         style: { color:"#111827", weight:2.5, fillOpacity:0 }
       });
 
-      municipiosValle.bindPopup(layer => {
-        const p = layer.feature?.properties || {};
-        const nombre = p.MUNICIPIO || p.NOM_MUN || p.NOMBRE || p.MPIO || p.NAME || "-";
-        return `<div style="min-width:220px"><b>Municipio Valle</b><br>${nombre}</div>`;
-      });
-
-      veredasValle.bindPopup(layer => {
-        const p = layer.feature?.properties || {};
-        return `<div style="min-width:220px"><b>Vereda</b><br>${p.NOMBRE_VER || p.NOMBRE || "-"}<br><hr style="margin:6px 0"><b>Municipio:</b> ${p.MUNICIPIO || "-"}</div>`;
-      });
 
       centrosPoblados.bindPopup(layer => {
         const p = layer.feature?.properties || {};
@@ -1547,6 +1846,7 @@
         municipiosValle: YEAR_LAYERS["Territorial · Municipios Valle"],
         municipiosValleLabels: MUNICIPIOS_VALLE_LABELS,
         veredasValle: YEAR_LAYERS["Territorial · Veredas Valle"],
+        veredasValleLabels: VEREDAS_VALLE_LABELS,
         centrosPoblados: YEAR_LAYERS["Territorial · Centros poblados"],
         viasPrincipales: YEAR_LAYERS["Territorial · Vías principales"],
         rios: YEAR_LAYERS["Territorial · Ríos"],
@@ -1560,6 +1860,10 @@
         <div class="legend-title">Clasificación del IRCA</div>
         ${Object.entries(RISK_COLORS).map(([k,c]) => `<div><i style="background:${c}"></i>${k}</div>`).join("")}
       `;
+
+      MAP.on("zoomend", function(){
+        updateVeredaLabelsVisibility();
+      });
 
       setTimeout(() => syncPanelLayersWithMap(), 300);
     }
@@ -1592,6 +1896,10 @@
           } else {
             if(MAP.hasLayer(layer)) MAP.removeLayer(layer);
           }
+
+          if(key === "veredasValle"){
+            updateVeredaLabelsVisibility();
+          }
         });
       });
     }
@@ -1617,10 +1925,21 @@
       const toggle = document.getElementById("layerToggle");
       const panel = document.getElementById("layerPanel");
       const closeBtn = document.getElementById("layerClose");
+      const legendToggle = document.getElementById("legendToggle");
+      const legendPanel = document.getElementById("legendPanel");
+      const legendClose = document.getElementById("legendClose");
       const mapEl = document.getElementById("map");
 
-      function closePanel(){ panel.classList.add("collapsed"); }
-      function togglePanel(){ panel.classList.toggle("collapsed"); }
+      function closePanel(){ if(panel) panel.classList.add("collapsed"); }
+      function closeLegend(){ if(legendPanel) legendPanel.classList.add("collapsed"); }
+      function togglePanel(){
+        if(panel) panel.classList.toggle("collapsed");
+        if(legendPanel) legendPanel.classList.add("collapsed");
+      }
+      function toggleLegend(){
+        if(legendPanel) legendPanel.classList.toggle("collapsed");
+        if(panel) panel.classList.add("collapsed");
+      }
 
       if(toggle){
         toggle.addEventListener("click", function(e){
@@ -1636,16 +1955,40 @@
         });
       }
 
+      if(legendToggle){
+        legendToggle.addEventListener("click", function(e){
+          e.stopPropagation();
+          toggleLegend();
+        });
+      }
+
+      if(legendClose){
+        legendClose.addEventListener("click", function(e){
+          e.stopPropagation();
+          closeLegend();
+        });
+      }
+
       if(panel){
         panel.addEventListener("click", function(e){ e.stopPropagation(); });
       }
 
+      if(legendPanel){
+        legendPanel.addEventListener("click", function(e){ e.stopPropagation(); });
+      }
+
       if(mapEl){
-        mapEl.addEventListener("click", function(){ closePanel(); });
+        mapEl.addEventListener("click", function(){
+          closePanel();
+          closeLegend();
+        });
       }
 
       document.addEventListener("keydown", function(e){
-        if(e.key === "Escape") closePanel();
+        if(e.key === "Escape"){
+          closePanel();
+          closeLegend();
+        }
       });
     }
 
@@ -1656,12 +1999,16 @@
         const layer = PANEL_LAYERS[key];
         if(!layer) return;
 
+        if(key === "veredasValleLabels") return;
+
         if(chk.checked){
           if(!MAP.hasLayer(layer)) MAP.addLayer(layer);
         } else {
           if(MAP.hasLayer(layer)) MAP.removeLayer(layer);
         }
       });
+
+      updateVeredaLabelsVisibility();
     }
 
     function createCircleMarker(d, year){
@@ -1683,6 +2030,35 @@
       });
     }
 
+
+    function escapeHTML(v){
+      return String(v == null ? "" : v)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#39;");
+    }
+
+    function treatmentBadgeStyle(name, active = false){
+      const palette = [
+        { bg:"#e8f0fe", border:"#b9ccfb", text:"#2f4b7c" },
+        { bg:"#eef2ff", border:"#c7d2fe", text:"#4338ca" },
+        { bg:"#ecfeff", border:"#a5f3fc", text:"#155e75" },
+        { bg:"#f0fdf4", border:"#bbf7d0", text:"#166534" },
+        { bg:"#fff7ed", border:"#fed7aa", text:"#9a3412" },
+        { bg:"#faf5ff", border:"#e9d5ff", text:"#7e22ce" },
+        { bg:"#f5f3ff", border:"#ddd6fe", text:"#5b21b6" },
+        { bg:"#f8fafc", border:"#cbd5e1", text:"#334155" }
+      ];
+      let idx = 0;
+      const key = norm(name || "SIN DATO");
+      for(let i=0;i<key.length;i++){ idx = (idx + key.charCodeAt(i)) % palette.length; }
+      const p = palette[idx];
+      const outline = active ? "outline:3px solid #22314d; box-shadow:0 4px 10px rgba(0,0,0,.15);" : "";
+      return `background:${p.bg}; border:1px solid ${p.border}; color:${p.text}; ${outline}`;
+    }
+
     function renderMapResumenIRCA(data){
       const year = chartYearFilter || document.getElementById("fano").value || "2025";
       const riskField = getRiskField(year);
@@ -1696,20 +2072,77 @@
         conteo[riesgo]++;
       });
 
+      const treatmentCounts = {};
+      data.forEach(d => {
+        const t = (d.TIPO_SISTEMA_TRATAMIENTO || "SIN DATO").trim() || "SIN DATO";
+        treatmentCounts[t] = (treatmentCounts[t] || 0) + 1;
+      });
+
+      const treatmentPairs = Object.entries(treatmentCounts)
+        .sort((a,b) => b[1] - a[1] || a[0].localeCompare(b[0], 'es'));
+
       const resumenEl = document.getElementById("mapResumenIRCA");
       if (!resumenEl) return;
 
-      resumenEl.innerHTML = categoriasOrden.map(cat => {
+      const municipio = document.getElementById("fmunicipio")?.value || "Todos";
+      const tipos = document.getElementById("ftipo")?.tomselect ? document.getElementById("ftipo").tomselect.getValue() : [];
+      const tipoTxt = tipos.length ? tipos.join(", ") : "Todos";
+      const visible = data.length;
+      const total = RAW.length;
+      const poblacion = data.reduce((acc, d) => acc + (d.POBLACION || 0), 0);
+      const suscriptores = data.reduce((acc, d) => acc + (d.SUSCRIPTORES || 0), 0);
+
+      const riskChips = categoriasOrden.map(cat => {
         const color = RISK_COLORS[cat] || "#6c757d";
         const textColor = (cat === "SIN RIESGO" || cat === "INVIABLE SANITARIAMENTE") ? "#fff" : "#111";
         const activeClass = norm(mapRiskBadgeFilter) === cat ? "risk-badge-active" : "";
-        return `<span class="risk-badge ${activeClass}" data-risk-badge="${cat}" style="background:${color}; color:${textColor}; cursor:pointer;">${cat}: ${conteo[cat] || 0}</span>`;
-      }).join(" ");
+        return `<span class="risk-badge ${activeClass}" data-risk-badge="${escapeHTML(cat)}" style="background:${color}; color:${textColor}; cursor:pointer;">${escapeHTML(cat)}: ${conteo[cat] || 0}</span>`;
+      }).join("");
+
+      const treatmentChips = treatmentPairs.length
+        ? treatmentPairs.map(([name, count]) => {
+            const activeClass = norm(mapTreatmentBadgeFilter) === norm(name) ? "treatment-badge-active" : "";
+            return `<span class="treatment-badge ${activeClass}" data-treatment-badge="${escapeHTML(name)}" style="${treatmentBadgeStyle(name, norm(mapTreatmentBadgeFilter) === norm(name))}">${escapeHTML(name)}: ${count}</span>`;
+          }).join("")
+        : `<span class="text-muted">Sin información</span>`;
+
+      resumenEl.innerHTML = `
+        <div class="map-summary-line">
+          <span><strong>Año:</strong> ${escapeHTML(year)}</span>
+          <span>·</span>
+          <span><strong>Municipio:</strong> ${escapeHTML(municipio)}</span>
+          <span>·</span>
+          <span><strong>Tipo:</strong> ${escapeHTML(tipoTxt)}</span>
+          ${mapTreatmentBadgeFilter ? `<span>·</span><span><strong>Tratamiento mapa:</strong> ${escapeHTML(mapTreatmentBadgeFilter)}</span>` : ``}
+        </div>
+        <div class="map-summary-line mt-1">
+          <span><strong>Cobertura actual:</strong> ${visible.toLocaleString("es-CO")} sistemas visibles</span>
+          <span>·</span>
+          <span><strong>Población:</strong> ${poblacion.toLocaleString("es-CO")}</span>
+          <span>·</span>
+          <span><strong>Suscriptores:</strong> ${suscriptores.toLocaleString("es-CO")}</span>
+          <span>·</span>
+          <span><strong>Total tablero:</strong> ${total.toLocaleString("es-CO")}</span>
+        </div>
+        <div class="map-summary-label">Distribución de riesgo de los sistemas visibles</div>
+        <div class="map-summary-chips">${riskChips}</div>
+        <div class="map-summary-label">Tipo sistema de tratamiento de los sistemas visibles</div>
+        <div class="map-summary-chips">${treatmentChips}</div>
+        <div class="map-summary-subnote">Haz clic en un chip de riesgo o tratamiento para filtrar el mapa.</div>
+      `;
 
       resumenEl.querySelectorAll("[data-risk-badge]").forEach(el => {
         el.addEventListener("click", function(){
           const selected = this.getAttribute("data-risk-badge");
           mapRiskBadgeFilter = mapRiskBadgeFilter === selected ? "" : selected;
+          applyFilters();
+        });
+      });
+
+      resumenEl.querySelectorAll("[data-treatment-badge]").forEach(el => {
+        el.addEventListener("click", function(){
+          const selected = this.getAttribute("data-treatment-badge");
+          mapTreatmentBadgeFilter = norm(mapTreatmentBadgeFilter) === norm(selected) ? "" : selected;
           applyFilters();
         });
       });
@@ -1785,6 +2218,29 @@
 
       cartoLight2020.addTo(MAP_COMPARE_2020);
       cartoLight2025.addTo(MAP_COMPARE_2025);
+
+      const URL_MUNICIPIO_VALLE = "https://services5.arcgis.com/l23kE3b7uPnZIuaB/arcgis/rest/services/CARTOGRAFIA_BASE/FeatureServer/2";
+      const URL_VALLE_CONTORNO = "https://services5.arcgis.com/l23kE3b7uPnZIuaB/arcgis/rest/services/Sedes_Educativas_WFL1/FeatureServer/8";
+
+      L.esri.featureLayer({
+        url: URL_MUNICIPIO_VALLE,
+        style: { color:"#8b5cf6", weight:2, fillColor:"#c4b5fd", fillOpacity:0.03 }
+      }).addTo(MAP_COMPARE_2020);
+
+      L.esri.featureLayer({
+        url: URL_VALLE_CONTORNO,
+        style: { color:"#111827", weight:2.4, fillOpacity:0 }
+      }).addTo(MAP_COMPARE_2020);
+
+      L.esri.featureLayer({
+        url: URL_MUNICIPIO_VALLE,
+        style: { color:"#8b5cf6", weight:2, fillColor:"#c4b5fd", fillOpacity:0.03 }
+      }).addTo(MAP_COMPARE_2025);
+
+      L.esri.featureLayer({
+        url: URL_VALLE_CONTORNO,
+        style: { color:"#111827", weight:2.4, fillOpacity:0 }
+      }).addTo(MAP_COMPARE_2025);
 
       compareLayer2020 = L.layerGroup().addTo(MAP_COMPARE_2020);
       compareLayer2025 = L.layerGroup().addTo(MAP_COMPARE_2025);
@@ -2078,23 +2534,7 @@
       return Number.isFinite(score) ? score : 0;
     }
 
-    
-    function priorityBand(score){
-      const n = Number(score || 0);
-      if(n >= 8) return { label:"Muy alta", color:"#ef4444", bg:"rgba(239,68,68,.12)" };
-      if(n >= 6) return { label:"Alta", color:"#f59e0b", bg:"rgba(245,158,11,.14)" };
-      if(n >= 4) return { label:"Media", color:"#eab308", bg:"rgba(234,179,8,.16)" };
-      return { label:"Baja", color:"#22c55e", bg:"rgba(34,197,94,.12)" };
-    }
-
-    function cleanDisplayText(v){
-      return String(v == null ? "" : v)
-        .replace(/�/g, "")
-        .replace(/\s+/g, " ")
-        .trim() || "-";
-    }
-
-function renderAnalytics(data){
+    function renderAnalytics(data){
       const criticalSystems = data.filter(d => {
         const r = norm(d.RIESGO_ACTUAL || "SIN DATO");
         return r === "ALTO" || r === "INVIABLE SANITARIAMENTE";
@@ -2146,25 +2586,15 @@ function renderAnalytics(data){
         ? alerts.map(a => `<div class="analytic-alert">${a}</div>`).join("")
         : `<div class="analytic-alert" style="border-left-color:#16a34a;background:#f6fff8;">No se detectaron alertas prioritarias con los filtros actuales.</div>`;
 
-      const topSystems = [...data]
-        .map(d => ({...d, PRIORIDAD: computePriority(d)}))
-        .sort((a,b)=>b.PRIORIDAD-a.PRIORIDAD)
-        .slice(0,10);
-
-      document.getElementById("anaTopSistemas").innerHTML = topSystems.map(d => {
-        const band = priorityBand(d.PRIORIDAD);
-        return `
+      const topSystems = [...data].map(d => ({...d, PRIORIDAD: computePriority(d)})).sort((a,b)=>b.PRIORIDAD-a.PRIORIDAD).slice(0,10);
+      document.getElementById("anaTopSistemas").innerHTML = topSystems.map(d => `
         <tr>
-          <td class="col-prestador">${cleanDisplayText(d.PERSONA_PRESTADORA || "-")}</td>
-          <td class="col-municipio">${cleanDisplayText(d.MUNICIPIO || "-")}</td>
-          <td class="col-irca">${Number(d.IRCA_ACTUAL || 0).toFixed(2)}</td>
-          <td class="col-prioridad">
-            ${d.PRIORIDAD.toFixed(2)}
-            <span class="priority-pill" style="color:${band.color}; background:${band.bg}; border-color:${band.color}33;">${band.label}</span>
-          </td>
+          <td>${(d.PERSONA_PRESTADORA || "-").slice(0,30)}</td>
+          <td>${d.MUNICIPIO || "-"}</td>
+          <td>${Number(d.IRCA_ACTUAL || 0).toFixed(2)}</td>
+          <td>${d.PRIORIDAD.toFixed(2)}</td>
         </tr>
-      `;
-      }).join("");
+      `).join("");
 
       const muniMap = {};
       data.forEach(d => {
@@ -2416,6 +2846,7 @@ function renderAnalytics(data){
           : [];
         if (tiposSeleccionados.length && !tiposSeleccionados.includes(d.TIPO)) return false;
         if(document.getElementById("ftipoSistema").value && d.TIPO_SISTEMA_TRATAMIENTO !== document.getElementById("ftipoSistema").value) return false;
+        if(mapTreatmentBadgeFilter && norm(d.TIPO_SISTEMA_TRATAMIENTO || "SIN DATO") !== norm(mapTreatmentBadgeFilter)) return false;
         if(document.getElementById("falgunTrat").value && String(d.ALGUN_TIPO_TRATAMIENTO) !== document.getElementById("falgunTrat").value) return false;
         if(document.getElementById("fprestador").value && d.PERSONA_PRESTADORA !== document.getElementById("fprestador").value) return false;
         if(document.getElementById("fformaOrg").value && d.FORMA_ORGANIZATIVA !== document.getElementById("fformaOrg").value) return false;
@@ -2481,6 +2912,7 @@ function renderAnalytics(data){
       chartMunicipioFilter = "";
       chartYearFilter = "";
       mapRiskBadgeFilter = "";
+      mapTreatmentBadgeFilter = "";
 
       document.getElementById("fano").value = "2025";
       ["fmunicipio","faro","fcodivc","ftipo","ftipoSistema","falgunTrat","fprestador","fformaOrg","fpuntoToma"]
@@ -2504,6 +2936,7 @@ function renderAnalytics(data){
       chartMunicipioFilter = "";
       chartYearFilter = "";
       mapRiskBadgeFilter = "";
+      mapTreatmentBadgeFilter = "";
 
       document.getElementById("fano").value = "2025";
       ["fmunicipio","faro","fcodivc","ftipo","ftipoSistema","falgunTrat","fprestador","fformaOrg","fpuntoToma"]
@@ -2537,157 +2970,4 @@ function renderAnalytics(data){
   </script>
 </body>
 </html>
-<section class="soft-card p-3 mb-4">
-        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
-          <div>
-            <h5 class="mb-1">Analítica de priorización y seguimiento</h5>
-            <div class="section-note">Bloque analítico posterior al componente espacial. Fase 1 implementada; Fases 2 y 3 listas para crecer.</div>
-          </div>
-        </div>
 
-        <div class="row g-4 mb-3">
-          <div class="col-12 col-xl-4">
-            <div class="analytic-card p-3 h-100">
-              <div class="analytic-phase-title">Fase 1 · Ejecutiva</div>
-              <div class="analytic-mini mb-3">Priorización, población expuesta, alertas y rankings.</div>
-
-              <div class="row g-3 mb-3">
-                <div class="col-6">
-                  <div class="kpi-card p-3">
-                    <div class="kpi-label">Sistemas críticos</div>
-                    <div id="anaKpiCriticos" class="kpi-value">–</div>
-                  </div>
-                </div>
-                <div class="col-6">
-                  <div class="kpi-card p-3">
-                    <div class="kpi-label">Población riesgo ≥ medio</div>
-                    <div id="anaKpiPobRiesgo" class="kpi-value">–</div>
-                  </div>
-                </div>
-                <div class="col-6">
-                  <div class="kpi-card p-3">
-                    <div class="kpi-label">Población alto/inviable</div>
-                    <div id="anaKpiPobAlta" class="kpi-value">–</div>
-                  </div>
-                </div>
-                <div class="col-6">
-                  <div class="kpi-card p-3">
-                    <div class="kpi-label">Sistemas sin tratamiento</div>
-                    <div id="anaKpiSinTrat" class="kpi-value">–</div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="analytic-phase-title mb-2">Alertas automáticas</div>
-              <div id="anaAlertas"></div>
-            </div>
-          </div>
-
-          <div class="col-12 col-xl-4">
-            <div class="analytic-card p-3 h-100">
-              <div class="analytic-phase-title">Top 10 sistemas críticos</div>
-              <div class="analytic-mini mb-2">Ranking de sistemas priorizados con base en riesgo sanitario, población y condición de tratamiento.</div>
-
-              <div class="analytic-method-box mb-3">
-                <div class="analytic-method-title">¿Cómo se calcula?</div>
-                <div class="analytic-method-text">
-                  El indicador de prioridad del sistema se construye combinando:
-                  <b>nivel de riesgo IRCA del año activo</b>,
-                  <b>población abastecida</b> y
-                  <b>condición de tratamiento</b>.
-                </div>
-                <div class="analytic-formula mt-2">
-                  Prioridad = factor de riesgo × log10(población + 1) × factor de tratamiento
-                </div>
-                <div class="analytic-method-list mt-2">
-                  <div><b>Factor de riesgo:</b> Sin riesgo = 0, Bajo = 1, Medio = 2, Alto = 3, Inviable = 4.</div>
-                  <div><b>Factor de tratamiento:</b> aumenta cuando el sistema no reporta tratamiento.</div>
-                  <div><b>Interpretación:</b> a mayor valor, mayor prioridad de atención.</div>
-                  <div><b>Rangos operativos del score:</b> Muy alta ≥ 8, Alta = 6–7.99, Media = 4–5.99, Baja &lt; 4.</div>
-                </div>
-              </div>
-
-              <div class="table-responsive">
-                <table class="table table-sm analytic-table">
-                  <thead>
-                    <tr>
-                      <th class="col-prestador">Prestador</th>
-                      <th class="col-municipio">Municipio</th>
-                      <th class="col-irca">IRCA</th>
-                      <th class="col-prioridad">Prioridad</th>
-                    </tr>
-                  </thead>
-                  <tbody id="anaTopSistemas"></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-12 col-xl-4">
-            <div class="analytic-card p-3 h-100">
-              <div class="analytic-phase-title">Top 10 municipios críticos</div>
-              <div class="analytic-mini mb-2">Ranking municipal a partir de la criticidad agregada de sus sistemas y la población expuesta.</div>
-
-              <div class="analytic-method-box mb-3">
-                <div class="analytic-method-title">¿Cómo se calcula?</div>
-                <div class="analytic-method-text">
-                  El indicador municipal consolida la situación del municipio combinando:
-                  <b>promedio IRCA</b>,
-                  <b>población expuesta en riesgo medio o superior</b> y
-                  <b>suma de prioridades de los sistemas filtrados</b>.
-                </div>
-                <div class="analytic-formula mt-2">
-                  Score municipal = suma de prioridades de sistemas + presión poblacional en riesgo
-                </div>
-                <div class="analytic-method-list mt-2">
-                  <div><b>IRCA promedio:</b> describe el comportamiento general del municipio.</div>
-                  <div><b>Población en riesgo:</b> cuantifica el impacto potencial sobre la población abastecida.</div>
-                  <div><b>Interpretación:</b> a mayor score, mayor criticidad municipal.</div>
-                </div>
-              </div>
-
-              <div class="table-responsive">
-                <table class="table table-sm analytic-table">
-                  <thead>
-                    <tr>
-                      <th>Municipio</th>
-                      <th>IRCA prom.</th>
-                      <th>Pob. riesgo</th>
-                      <th>Score</th>
-                    </tr>
-                  </thead>
-                  <tbody id="anaTopMunicipios"></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="row g-4">
-          <div class="col-12 col-lg-6">
-            <div class="analytic-card p-3 h-100">
-              <div class="analytic-phase-title">Fase 2 · Territorial</div>
-              <div class="analytic-mini mb-3">Preparada para cruces con capas territoriales.</div>
-              <div class="analytic-placeholder">
-                Este bloque está listo para crecer con analítica espacial, como:
-                cruce con sedes educativas, centros poblados, ríos, vías principales,
-                veredas y fichas territoriales por municipio.
-              </div>
-            </div>
-          </div>
-
-          <div class="col-12 col-lg-6">
-            <div class="analytic-card p-3 h-100">
-              <div class="analytic-phase-title">Fase 3 · Predictiva y seguimiento</div>
-              <div class="analytic-mini mb-3">Preparada para tendencia y proyección.</div>
-              <div class="analytic-placeholder">
-                Este bloque está listo para incorporar:
-                tendencia por sistema, mejora/empeora/estable, cobertura del dato,
-                proyección simple del IRCA y seguimiento institucional de intervenciones.
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      

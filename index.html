@@ -404,6 +404,14 @@
     return null;
   }
 
+  function isValidCoord(lat, lon){
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return false;
+    if (lat === 0 && lon === 0) return false;
+    if (lat < -90 || lat > 90 || lon < -180 || lon > 180) return false;
+    if (lat < -5 || lat > 15 || lon < -82 || lon > -66) return false;
+    return true;
+  }
+
   /* 4) MAPA (+ listeners de leyenda por overlay) */
   function initMap(){
     MAP = L.map('map', { fullscreenControl:true }).setView([4.6,-74.1], 7);
@@ -431,7 +439,7 @@
     document.getElementById('btnGeoJSON')?.addEventListener('click', downloadGeoJSON);
   }
   function fitBoundsToPoints(data){
-    const pts = data.filter(d=>Number.isFinite(d.LATITUD)&&Number.isFinite(d.LONGITUD));
+    const pts = data.filter(d => isValidCoord(d.LATITUD, d.LONGITUD));
     if(!pts.length) return;
     const b = L.latLngBounds(pts.map(d=>[d.LATITUD,d.LONGITUD]));
     MAP.fitBounds(b.pad(0.15));
@@ -479,8 +487,8 @@
           SALUD: asYesNo(r[COL.salud]),
           TANQUE_SED: asYesNo(r[COL.tanqueSed]),
           VASIJA_SED: asYesNo(r[COL.vasijaSed]),
-          LATITUD: isNaN(lat)? null: lat,
-          LONGITUD: isNaN(lon)? null: lon
+          LATITUD: isValidCoord(lat, lon) ? lat : null,
+          LONGITUD: isValidCoord(lat, lon) ? lon : null
         };
       });
 
@@ -556,7 +564,7 @@
     CAPA_VIVIENDAS.clearLayers();
     CAPA_BURBUJAS.clearLayers();
 
-    const pts = data.filter(d=>Number.isFinite(d.LATITUD)&&Number.isFinite(d.LONGITUD));
+    const pts = data.filter(d => isValidCoord(d.LATITUD, d.LONGITUD));
     document.getElementById('mapCount').textContent = `${pts.length} ${pts.length===1?'punto':'puntos'}`;
 
     // Resumen por fuente
@@ -612,7 +620,7 @@
   }
   // Descargar GeoJSON filtrado
   function downloadGeoJSON(){
-    const features = LIST.filter(d=>Number.isFinite(d.LATITUD)&&Number.isFinite(d.LONGITUD)).map(d=>({
+    const features = LIST.filter(d => isValidCoord(d.LATITUD, d.LONGITUD)).map(d=>({
       type:"Feature",
       geometry:{ type:"Point", coordinates:[d.LONGITUD, d.LATITUD] },
       properties:{

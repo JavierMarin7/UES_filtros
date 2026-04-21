@@ -114,6 +114,15 @@
               </select>
             </div>
 
+            <div class="mt-3 mb-2">
+              <label class="form-label">Tipo de aplicación</label>
+              <select class="form-select" id="tipoAplicacion">
+                <option value="goteo" selected>Dosificación continua por goteo</option>
+                <option value="puntual">Mezcla puntual por lote o tanque</option>
+              </select>
+              <div class="hint mt-1">Seleccione goteo cuando la solución se dosifica poco a poco. Seleccione mezcla puntual cuando la preparación completa se aplica de una sola vez a un tanque, reservorio o lote de agua.</div>
+            </div>
+
             <div id="bloqueCaudal">
               <label class="form-label">Caudal del sistema (L/s)</label>
               <input type="number" class="form-control" id="caudalLs" value="1" min="0" step="0.001">
@@ -136,7 +145,7 @@
             </div>
 
             <div class="mt-3">
-              <label class="form-label">Tiempo que debe durar la preparación</label>
+              <label class="form-label" id="lblDuracion">Tiempo que debe durar la preparación</label>
               <select class="form-select" id="duracionTipo">
                 <option value="horas">Horas</option>
                 <option value="minutos">Minutos</option>
@@ -144,7 +153,7 @@
             </div>
             <div class="mt-2">
               <input type="number" class="form-control" id="duracionValor" value="8" min="0.1" step="0.1">
-              <div class="hint mt-1">Ejemplo usual: preparar una solución para 8 horas de operación.</div>
+              <div class="hint mt-1" id="hintDuracion">Ejemplo usual: preparar una solución para 8 horas de operación.</div>
             </div>
 
             <div class="mt-3">
@@ -228,11 +237,11 @@
             <div class="result-box mb-3">
               <table class="table table-sm small-table mb-0">
                 <tr><td><b>Dosis total aplicada</b></td><td class="text-end mono" id="rDosisTotal">0.00 mg/L</td></tr>
-                <tr><td><b>Agua a tratar en ese periodo</b></td><td class="text-end mono" id="rVolumenPeriodo">0 L</td></tr>
+                <tr><td><b id="lblVolumenPeriodo">Agua a tratar en ese periodo</b></td><td class="text-end mono" id="rVolumenPeriodo">0 L</td></tr>
                 <tr><td><b>Cloro activo requerido</b></td><td class="text-end mono" id="rCloroActivo">0.00 g</td></tr>
                 <tr><td><b>Producto comercial requerido</b></td><td class="text-end mono" id="rProducto">0.00</td></tr>
                 <tr><td><b>Concentración de la solución preparada</b></td><td class="text-end mono" id="rSolucion">0.00</td></tr>
-                <tr><td><b>Ritmo de dosificación estimado</b></td><td class="text-end mono" id="rDosificacion">0.00 mL/min</td></tr>
+                <tr><td><b id="lblDosificacion">Ritmo de dosificación estimado</b></td><td class="text-end mono" id="rDosificacion">0.00 mL/min</td></tr>
               </table>
             </div>
 
@@ -248,9 +257,10 @@
         <div class="section-title">4. Guía corta de uso</div>
         <ol class="mb-0">
           <li>Seleccione cómo quiere calcular: por caudal, por población o por volumen.</li>
-          <li>Ingrese el tiempo que debe durar la preparación en el recipiente.</li>
+          <li>Seleccione si el sistema trabaja por goteo continuo o por mezcla puntual.</li>
+          <li>Ingrese el tiempo de dosificación o el tiempo de llenado del lote, según corresponda.</li>
           <li>Seleccione el producto comercial que realmente tiene el operario.</li>
-          <li>Use la instrucción principal para preparar la solución en 250 mL o 500 mL.</li>
+          <li>Use la instrucción principal para preparar la solución en 250 mL o 500 mL y aplicarla según el modo seleccionado.</li>
           <li>Verifique en red el cloro residual libre y ajuste la meta o la demanda adicional.</li>
         </ol>
       </section>
@@ -267,6 +277,7 @@
   <script>
     const $ = id => document.getElementById(id);
 
+
     const PRESETS = {
       hth: [70, 65, 60],
       naocl: [13, 10, 7, 5]
@@ -276,11 +287,15 @@
       return Number(n || 0).toLocaleString('es-CO', {minimumFractionDigits:d, maximumFractionDigits:d});
     }
 
-    function volumenPeriodoLitros(){
-      const metodo = $('metodoCalculo').value;
+    function getMinutos(){
       const duracionTipo = $('duracionTipo').value;
       const duracionValor = parseFloat($('duracionValor').value) || 0;
-      const minutos = duracionTipo === 'horas' ? duracionValor * 60 : duracionValor;
+      return duracionTipo === 'horas' ? duracionValor * 60 : duracionValor;
+    }
+
+    function volumenPeriodoLitros(){
+      const metodo = $('metodoCalculo').value;
+      const minutos = getMinutos();
 
       if(metodo === 'caudal'){
         const q = parseFloat($('caudalLs').value) || 0;
@@ -321,10 +336,15 @@
 
     function actualizarObservacion(){
       const tipo = $('tipoProducto').value;
-      if(tipo === 'hth'){
-        $('observacion').value = 'Útil cuando el consumo es bajo o el sistema es pequeño. Facilita transporte y almacenamiento en operación rural.';
+      const aplicacion = $('tipoAplicacion').value;
+      if(tipo === 'hth' && aplicacion === 'goteo'){
+        $('observacion').value = 'Recomendado en sistemas pequeños o rurales donde se prepara una solución madre y se deja caer gota a gota.';
+      } else if (tipo === 'hth' && aplicacion === 'puntual') {
+        $('observacion').value = 'Útil para desinfección por lote o tanque. Se prepara la solución y se aplica completa al volumen calculado.';
+      } else if (tipo === 'naocl' && aplicacion === 'goteo') {
+        $('observacion').value = 'Útil cuando hay dosificación continua y mayor consumo. Revise concentración real, fecha del producto y estabilidad.';
       } else {
-        $('observacion').value = 'Útil cuando hay dosificación continua y mayor consumo. Verifique siempre concentración real y fecha del producto.';
+        $('observacion').value = 'Útil para mezcla puntual cuando se requiere aplicación rápida al tanque o reservorio. Mezcle bien y verifique residual.';
       }
     }
 
@@ -335,14 +355,32 @@
       $('bloqueVolumen').style.display = metodo === 'volumen' ? '' : 'none';
     }
 
+    function actualizarEtiquetasAplicacion(){
+      const aplicacion = $('tipoAplicacion').value;
+      if(aplicacion === 'goteo'){
+        $('lblDuracion').textContent = 'Tiempo que debe durar la preparación';
+        $('hintDuracion').textContent = 'Ejemplo usual: preparar una solución para 8 horas de operación.';
+        $('lblVolumenPeriodo').textContent = 'Agua a tratar en ese periodo';
+        $('lblDosificacion').textContent = 'Ritmo de dosificación estimado';
+      } else {
+        $('lblDuracion').textContent = 'Tiempo de llenado o aplicación del lote';
+        $('hintDuracion').textContent = 'Ejemplo: tiempo durante el cual entra el agua al tanque o se aplica la mezcla puntual.';
+        $('lblVolumenPeriodo').textContent = 'Volumen del lote o tanque a tratar';
+        $('lblDosificacion').textContent = 'Aplicación de la mezcla';
+      }
+      actualizarObservacion();
+    }
+
     function calcular(){
       const tipo = $('tipoProducto').value;
+      const aplicacion = $('tipoAplicacion').value;
       const concPct = parseFloat($('concentracion').value) || 0;
       const volRecipienteMl = parseFloat($('volumenRecipienteMl').value) || 500;
       const meta = parseFloat($('metaMgL').value) || 0;
       const demanda = parseFloat($('demandaMgL').value) || 0;
       const dosisTotalMgL = meta + demanda;
       const volPeriodoL = volumenPeriodoLitros();
+      const minutos = getMinutos();
 
       const cloroActivoMg = dosisTotalMgL * volPeriodoL;
       const cloroActivoG = cloroActivoMg / 1000;
@@ -351,6 +389,7 @@
       let productoUnidad = '';
       let solTexto = '';
       let instruccion = '';
+      let dosificacionTexto = '';
 
       if(tipo === 'hth'){
         const fraccion = concPct / 100;
@@ -358,26 +397,38 @@
         productoUnidad = 'g de hipoclorito de calcio';
         const gPorL = (productoValor / (volRecipienteMl / 1000));
         solTexto = fmt(gPorL,2) + ' g/L';
-        instruccion = `Tome el recipiente de ${volRecipienteMl} mL y agregue ${fmt(productoValor,1)} g de hipoclorito de calcio al ${fmt(concPct,1)} %. Complete con agua hasta ${volRecipienteMl} mL.`;
+        if(aplicacion === 'goteo'){
+          instruccion = `Tome el recipiente de ${volRecipienteMl} mL y agregue ${fmt(productoValor,1)} g de hipoclorito de calcio al ${fmt(concPct,1)} %. Complete con agua hasta ${volRecipienteMl} mL y dosifique de manera continua durante ${fmt(minutos,0)} minutos.`;
+        } else {
+          instruccion = `Tome el recipiente de ${volRecipienteMl} mL y agregue ${fmt(productoValor,1)} g de hipoclorito de calcio al ${fmt(concPct,1)} %. Complete con agua hasta ${volRecipienteMl} mL y aplique toda la mezcla al lote o tanque de ${fmt(volPeriodoL,0)} L.`;
+        }
       } else {
         const gramosDisponiblesPorMl = concPct > 0 ? (concPct / 100) : 0;
         productoValor = gramosDisponiblesPorMl > 0 ? cloroActivoG / gramosDisponiblesPorMl : 0;
         productoUnidad = 'mL de hipoclorito de sodio';
         const pctSol = (productoValor / volRecipienteMl) * 100;
         solTexto = fmt(pctSol,2) + ' % v/v en el recipiente';
-        instruccion = `Tome el recipiente de ${volRecipienteMl} mL y agregue ${fmt(productoValor,1)} mL de hipoclorito de sodio al ${fmt(concPct,1)} %. Complete con agua hasta ${volRecipienteMl} mL.`;
+        if(aplicacion === 'goteo'){
+          instruccion = `Tome el recipiente de ${volRecipienteMl} mL y agregue ${fmt(productoValor,1)} mL de hipoclorito de sodio al ${fmt(concPct,1)} %. Complete con agua hasta ${volRecipienteMl} mL y dosifique de manera continua durante ${fmt(minutos,0)} minutos.`;
+        } else {
+          instruccion = `Tome el recipiente de ${volRecipienteMl} mL y agregue ${fmt(productoValor,1)} mL de hipoclorito de sodio al ${fmt(concPct,1)} %. Complete con agua hasta ${volRecipienteMl} mL y aplique toda la mezcla al lote o tanque de ${fmt(volPeriodoL,0)} L.`;
+        }
       }
 
-      const duracionTipo = $('duracionTipo').value;
-      const duracionValor = parseFloat($('duracionValor').value) || 0;
-      const minutos = duracionTipo === 'horas' ? duracionValor * 60 : duracionValor;
       const dosificacionMlMin = minutos > 0 ? volRecipienteMl / minutos : 0;
+      if(aplicacion === 'goteo'){
+        dosificacionTexto = fmt(dosificacionMlMin,2) + ' mL/min';
+      } else {
+        dosificacionTexto = 'Aplicar todo el recipiente (' + fmt(volRecipienteMl,0) + ' mL) al lote';
+      }
 
       $('kpiMeta').textContent = fmt(meta,2) + ' mg/L';
       $('kpiProducto').textContent = fmt(productoValor,1);
       $('kpiProductoUnidad').textContent = productoUnidad + ' por preparación';
       $('kpiAgua').textContent = fmt(volPeriodoL,0) + ' L';
-      $('kpiAguaDetalle').textContent = `volumen tratado en ${fmt(duracionValor,1)} ${duracionTipo}`;
+      $('kpiAguaDetalle').textContent = aplicacion === 'goteo'
+        ? `volumen tratado en ${fmt(($('duracionValor').value || 0),1)} ${$('duracionTipo').value}`
+        : `volumen del lote o tanque calculado`;
 
       $('instruccionPrincipal').textContent = instruccion;
       $('rDosisTotal').textContent = fmt(dosisTotalMgL,2) + ' mg/L';
@@ -385,10 +436,12 @@
       $('rCloroActivo').textContent = fmt(cloroActivoG,2) + ' g';
       $('rProducto').textContent = fmt(productoValor,2) + ' ' + (tipo === 'hth' ? 'g' : 'mL');
       $('rSolucion').textContent = solTexto;
-      $('rDosificacion').textContent = fmt(dosificacionMlMin,2) + ' mL/min';
+      $('rDosificacion').textContent = dosificacionTexto;
 
       let control = 'Verifique en red el cloro residual libre. ';
-      if(meta < 0.3){
+      if(aplicacion === 'puntual'){
+        control += 'Después de aplicar la mezcla puntual, permita mezcla homogénea y verifique residual después del tiempo de contacto operacional.';
+      } else if(meta < 0.3){
         control += 'La meta objetivo está muy baja para arrancar.';
       } else if(meta > 2.0){
         control += 'La meta objetivo supera el rango usual de control en red.';
@@ -399,6 +452,7 @@
     }
 
     $('metodoCalculo').addEventListener('change', () => { actualizarBloquesMetodo(); calcular(); });
+    $('tipoAplicacion').addEventListener('change', () => { actualizarEtiquetasAplicacion(); calcular(); });
     $('tipoProducto').addEventListener('change', () => { actualizarPresentaciones(); calcular(); });
     $('presetConcentracion').addEventListener('change', () => {
       if($('presetConcentracion').value !== 'otro') $('concentracion').value = $('presetConcentracion').value;
@@ -411,6 +465,7 @@
 
     actualizarBloquesMetodo();
     actualizarPresentaciones();
+    actualizarEtiquetasAplicacion();
     calcular();
   </script>
 </body>

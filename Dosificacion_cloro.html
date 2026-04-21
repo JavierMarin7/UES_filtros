@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Calculadora de dosis de cloro – Acueductos rurales</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <style>
+    :root{
+      --board-max: 1460px;
+      --shadow-soft: 0 8px 24px rgba(0,0,0,.06);
+      --border-soft: 1px solid #e9ecef;
+      --brand-blue: #2e64d2;
+      --bg-page: #f4f6f8;
+      --text-muted:#667085;
+      --good:#198754;
+      --warn:#fd7e14;
+      --soft-blue:#eef4ff;
+    }
+    body{background:var(--bg-page); color:#212529;}
+    .gov-banner{ background-color:#2e64d2; height:46px; width:100%; z-index:10; }
+    .gov-banner img{ height:30px; }
+    .bg-shell{ background:var(--bg-page); min-height:100vh; }
+    .board{ max-width:var(--board-max); margin:0 auto; padding:24px 16px 36px; }
+    .soft-card,.kpi-card,header{ border:0; border-radius:1rem; box-shadow:var(--shadow-soft); background:#fff; }
+    .header-ues{ border-bottom:var(--border-soft); }
+    .header-ues .brand-strip{ display:flex; justify-content:center; align-items:center; gap:.75rem; flex-wrap:wrap; }
+    .header-ues .brand-strip img{ max-width:100%; height:auto; }
+    .board-title{ font-size:clamp(1.5rem,2vw,2.1rem); font-weight:800; color:#1f2937; margin:0; }
+    .board-subtitle{ color:var(--text-muted); font-size:.95rem; }
+    .section-title{ font-size:1.05rem; font-weight:800; color:#1f2937; }
+    .small-muted{ color:var(--text-muted); font-size:.9rem; }
+    .kpi-card{ height:100%; }
+    .kpi-label{ font-size:.88rem; color:#475467; font-weight:700; text-transform:uppercase; letter-spacing:.02em; }
+    .kpi-value{ font-size:clamp(18px,2.8vw,34px); font-weight:800; line-height:1.1; }
+    .box-note{ border-left:4px solid var(--brand-blue); background:#f8fbff; }
+    .norm-box{ border-left:4px solid var(--good); background:#f7fcf9; }
+    .warn-box{ border-left:4px solid var(--warn); background:#fff8f3; }
+    .formula{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background:#f8f9fa; border-radius:.5rem; padding:.65rem .8rem; }
+    .result-chip{ display:inline-block; border-radius:999px; padding:.35rem .7rem; font-weight:700; background:#eef4ff; color:#1d4ed8; }
+    .table-sm td, .table-sm th{ padding:.45rem .55rem; }
+    .footer-mini{ color:#667085; font-size:.84rem; }
+    .hidden{ display:none !important; }
+    @media (max-width:576px){ .board{ padding-left:10px; padding-right:10px; } }
+  </style>
+</head>
+<body>
+  <div class="gov-banner">
+    <div class="container d-flex align-items-center" style="height:100%;">
+      <img src="https://www.gov.co/assets/images/logo.png" alt="GOV.CO">
+    </div>
+  </div>
+
+  <main class="bg-shell">
+    <div class="board">
+      <header class="header-ues py-2 mb-3">
+        <div class="container-fluid px-3">
+          <div class="brand-strip">
+            <img src="https://www.uesvalle.gov.co/info/uesvalle/media/bloque1656.png" alt="UESVALLE" loading="lazy" class="img-fluid">
+          </div>
+        </div>
+      </header>
+
+      <section class="soft-card p-3 mb-3">
+        <div class="d-flex flex-column flex-lg-row align-items-lg-center gap-3">
+          <div class="me-auto">
+            <h1 class="board-title">Calculadora de dosis de cloro para desinfección</h1>
+            <div class="board-subtitle mt-1">Herramienta operativa para acueductos rurales – preparación de solución madre y cálculo directo de producto.</div>
+          </div>
+          <div>
+            <span class="result-chip">Versión independiente HTML</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="soft-card p-3 mb-3 norm-box">
+        <div class="section-title mb-2">Criterio normativo y criterio operativo</div>
+        <div class="small-muted">
+          La <strong>Resolución 2115 de 2007</strong> establece que el <strong>cloro residual libre</strong> en cualquier punto de la red de distribución debe estar entre <strong>0,3 y 2,0 mg/L</strong>, y que la dosis por aplicar debe resultar de <strong>pruebas frecuentes de demanda de cloro</strong>. Por eso, esta calculadora deja como valor inicial un <strong>objetivo operativo de 1,0 mg/L</strong>, pero permite ajustarlo según el comportamiento real del sistema.
+        </div>
+      </section>
+
+      <div class="row g-3">
+        <div class="col-12 col-xl-5">
+          <section class="soft-card p-3 mb-3">
+            <div class="section-title mb-3">1. Datos de entrada</div>
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="form-label fw-semibold">Modo de cálculo</label>
+                <select id="modoCalculo" class="form-select">
+                  <option value="caudal">Por caudal del sistema</option>
+                  <option value="poblacion">Por población y dotación</option>
+                  <option value="volumen">Por volumen de agua a tratar</option>
+                </select>
+              </div>
+
+              <div class="col-12 hidden" id="wrapPoblacion">
+                <label class="form-label fw-semibold">Población atendida</label>
+                <input id="poblacion" type="number" min="0" step="1" class="form-control" value="500">
+              </div>
+
+              <div class="col-12 hidden" id="wrapDotacion">
+                <label class="form-label fw-semibold">Dotación (L/hab·día)</label>
+                <input id="dotacion" type="number" min="0" step="0.1" class="form-control" value="100">
+              </div>
+
+              <div class="col-12" id="wrapCaudal">
+                <label class="form-label fw-semibold">Caudal del sistema (L/s)</label>
+                <input id="caudal" type="number" min="0" step="0.001" class="form-control" value="1">
+              </div>
+
+              <div class="col-12 hidden" id="wrapVolumenAgua">
+                <label class="form-label fw-semibold">Volumen de agua a tratar (L)</label>
+                <input id="volumenAgua" type="number" min="0" step="1" class="form-control" value="1000">
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label class="form-label fw-semibold">Tipo de producto</label>
+                <select id="tipoCloro" class="form-select">
+                  <option value="hth">Hipoclorito de calcio granular</option>
+                  <option value="naocl">Hipoclorito de sodio líquido</option>
+                </select>
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label class="form-label fw-semibold">Concentración comercial (%)</label>
+                <input id="concentracion" type="number" min="0.1" step="0.1" class="form-control" value="70">
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label class="form-label fw-semibold">Objetivo operativo de residual libre (mg/L)</label>
+                <input id="residualObjetivo" type="number" min="0.1" step="0.1" class="form-control" value="1.0">
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label class="form-label fw-semibold">Demanda estimada de cloro / pérdidas (mg/L)</label>
+                <input id="demandaCloro" type="number" min="0" step="0.1" class="form-control" value="0.5">
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label class="form-label fw-semibold">Volumen de preparación de la solución madre</label>
+                <select id="volumenDisolucion" class="form-select">
+                  <option value="250">250 mL</option>
+                  <option value="500" selected>500 mL</option>
+                </select>
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label class="form-label fw-semibold">Tiempo que debe durar esa solución</label>
+                <select id="horasAutonomia" class="form-select">
+                  <option value="0.5">30 minutos</option>
+                  <option value="1">1 hora</option>
+                  <option value="2">2 horas</option>
+                  <option value="4">4 horas</option>
+                  <option value="8" selected>8 horas</option>
+                  <option value="12">12 horas</option>
+                  <option value="24">24 horas</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="d-flex gap-2 flex-wrap mt-3">
+              <button id="btnCalcular" class="btn btn-primary px-4">Calcular</button>
+              <button id="btnLimpiar" class="btn btn-outline-secondary">Restablecer</button>
+            </div>
+          </section>
+
+          <section class="soft-card p-3 mb-3 box-note">
+            <div class="section-title mb-2">2. Lógica del cálculo</div>
+            <div class="small-muted mb-2">La dosis total aplicada se calcula así:</div>
+            <div class="formula">Dosis aplicada (mg/L) = residual objetivo + demanda estimada</div>
+            <div class="small-muted mt-2">Luego esa dosis se convierte a cantidad de producto comercial según el porcentaje de cloro disponible.</div>
+          </section>
+
+          <section class="soft-card p-3 warn-box">
+            <div class="section-title mb-2">Importante</div>
+            <ul class="small-muted mb-0">
+              <li>El valor de <strong>1,0 mg/L</strong> se usa aquí como meta operativa inicial, no como valor único obligatorio.</li>
+              <li>Para asegurar cumplimiento real en red, la dosis debe validarse con <strong>mediciones de cloro residual libre</strong> en campo.</li>
+              <li>Si el residual medido queda por debajo de 0,3 mg/L, se debe ajustar la dosis; si supera 2,0 mg/L, también se debe corregir.</li>
+            </ul>
+          </section>
+        </div>
+
+        <div class="col-12 col-xl-7">
+          <section class="soft-card p-3 mb-3">
+            <div class="section-title mb-3">3. Resultado operativo para el operador</div>
+            <div class="row g-3 mb-3">
+              <div class="col-12 col-md-6 col-lg-3">
+                <div class="kpi-card p-3 bg-light">
+                  <div class="kpi-label">Dosis aplicada</div>
+                  <div id="outDosisAplicada" class="kpi-value">–</div>
+                  <div class="small-muted">mg/L</div>
+                </div>
+              </div>
+              <div class="col-12 col-md-6 col-lg-3">
+                <div class="kpi-card p-3 bg-light">
+                  <div class="kpi-label">Producto requerido</div>
+                  <div id="outProducto" class="kpi-value">–</div>
+                  <div id="outProductoUnidad" class="small-muted">–</div>
+                </div>
+              </div>
+              <div class="col-12 col-md-6 col-lg-3">
+                <div class="kpi-card p-3 bg-light">
+                  <div class="kpi-label">Solución madre</div>
+                  <div id="outPreparacion" class="kpi-value">–</div>
+                  <div class="small-muted">en 250 o 500 mL</div>
+                </div>
+              </div>
+              <div class="col-12 col-md-6 col-lg-3">
+                <div class="kpi-card p-3 bg-light">
+                  <div class="kpi-label">Ritmo de dosificación</div>
+                  <div id="outRitmo" class="kpi-value">–</div>
+                  <div class="small-muted">mL/min</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="alert alert-primary mb-3" id="mensajeOperador">
+              Ingrese los datos y pulse <strong>Calcular</strong>.
+            </div>
+
+            <div class="table-responsive">
+              <table class="table table-sm align-middle">
+                <tbody>
+                  <tr><th style="width:42%">Caudal base equivalente</th><td id="outCaudalBase">–</td></tr>
+                  <tr><th>Volumen de agua tratado en el periodo de la solución</th><td id="outVolumenPeriodo">–</td></tr>
+                  <tr><th>Cloro activo requerido</th><td id="outCloroActivo">–</td></tr>
+                  <tr><th>Concentración del producto comercial</th><td id="outConcentracion">–</td></tr>
+                  <tr><th>Preparación sugerida</th><td id="outPreparacionDet">–</td></tr>
+                  <tr><th>Observación operativa</th><td id="outObservacion">–</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="soft-card p-3 mb-3">
+            <div class="section-title mb-2">4. Guía rápida para el operario</div>
+            <ol class="small-muted mb-0">
+              <li>Seleccione si el cálculo se hará por <strong>caudal</strong>, por <strong>población</strong> o por <strong>volumen de agua</strong>.</li>
+              <li>Ingrese el tipo de cloro y su concentración comercial.</li>
+              <li>Defina el residual objetivo y la demanda estimada.</li>
+              <li>Seleccione si la preparación será en <strong>250 mL</strong> o <strong>500 mL</strong>.</li>
+              <li>Defina cuánto tiempo debe durar esa solución en el dosificador.</li>
+              <li>La herramienta mostrará exactamente cuántos <strong>gramos</strong> o <strong>mL</strong> de producto usar.</li>
+              <li>Verifique en campo el residual libre y ajuste si es necesario.</li>
+            </ol>
+          </section>
+
+          <section class="soft-card p-3 footer-mini">
+            Base de diseño tomada de la estructura institucional que compartiste para tus tableros, adaptada aquí como página independiente y sin enlaces externos de navegación.
+          </section>
+        </div>
+      </div>
+    </div>
+  </main>
+
+<script>
+function fmt(n, dec=2){
+  if(!isFinite(n)) return '–';
+  return Number(n).toLocaleString('es-CO',{minimumFractionDigits:dec, maximumFractionDigits:dec});
+}
+function setText(id, txt){ document.getElementById(id).textContent = txt; }
+function toggleModo(){
+  const modo = document.getElementById('modoCalculo').value;
+  document.getElementById('wrapPoblacion').classList.toggle('hidden', modo !== 'poblacion');
+  document.getElementById('wrapDotacion').classList.toggle('hidden', modo !== 'poblacion');
+  document.getElementById('wrapCaudal').classList.toggle('hidden', modo !== 'caudal');
+  document.getElementById('wrapVolumenAgua').classList.toggle('hidden', modo !== 'volumen');
+}
+function setDefaultConcentration(){
+  const tipo = document.getElementById('tipoCloro').value;
+  const input = document.getElementById('concentracion');
+  if(tipo === 'hth' && (!input.dataset.userTouched || Number(input.value) === 5 || Number(input.value) === 13)){ input.value = 70; }
+  if(tipo === 'naocl' && Number(input.value) === 70){ input.value = 5; }
+}
+function calcular(){
+  const modo = document.getElementById('modoCalculo').value;
+  const tipo = document.getElementById('tipoCloro').value;
+  const concentracionPct = Number(document.getElementById('concentracion').value);
+  const residualObjetivo = Number(document.getElementById('residualObjetivo').value);
+  const demandaCloro = Number(document.getElementById('demandaCloro').value);
+  const volumenDisolucionMl = Number(document.getElementById('volumenDisolucion').value);
+  const horasAutonomia = Number(document.getElementById('horasAutonomia').value);
+
+  let caudalLs = 0;
+  let volumenPeriodoL = 0;
+
+  if(modo === 'caudal'){
+    caudalLs = Number(document.getElementById('caudal').value);
+    volumenPeriodoL = caudalLs * 3600 * horasAutonomia;
+  } else if(modo === 'poblacion'){
+    const poblacion = Number(document.getElementById('poblacion').value);
+    const dotacion = Number(document.getElementById('dotacion').value);
+    const volumenDia = poblacion * dotacion;
+    caudalLs = volumenDia / 86400;
+    volumenPeriodoL = volumenDia * (horasAutonomia / 24);
+  } else {
+    const volumenAguaL = Number(document.getElementById('volumenAgua').value);
+    volumenPeriodoL = volumenAguaL;
+    caudalLs = horasAutonomia > 0 ? volumenPeriodoL / (horasAutonomia * 3600) : 0;
+  }
+
+  if(!isFinite(caudalLs) || !isFinite(volumenPeriodoL) || caudalLs < 0 || volumenPeriodoL <= 0 || concentracionPct <= 0 || residualObjetivo <= 0 || demandaCloro < 0){
+    alert('Revise los datos de entrada.');
+    return;
+  }
+
+  const dosisAplicadaMgL = residualObjetivo + demandaCloro;
+  const cloroActivoMg = dosisAplicadaMgL * volumenPeriodoL;
+  const cloroActivoG = cloroActivoMg / 1000;
+  const fraccion = concentracionPct / 100;
+
+  let cantidadProducto;
+  let unidadProducto;
+  if(tipo === 'hth'){
+    cantidadProducto = cloroActivoG / fraccion; // g de producto granular
+    unidadProducto = 'gramos de producto';
+  } else {
+    // Aproximación operativa: % p/v ~= g por 100 mL
+    const gNaoclPorMl = concentracionPct / 100;
+    cantidadProducto = cloroActivoG / gNaoclPorMl; // mL de producto líquido
+    unidadProducto = 'mL de producto';
+  }
+
+  const ritmoDosificacionMlMin = volumenDisolucionMl / (horasAutonomia * 60);
+
+  setText('outDosisAplicada', fmt(dosisAplicadaMgL,2));
+  setText('outProducto', fmt(cantidadProducto,2));
+  setText('outProductoUnidad', unidadProducto);
+  setText('outPreparacion', fmt(tipo === 'hth' ? cantidadProducto : cantidadProducto,2));
+  setText('outRitmo', fmt(ritmoDosificacionMlMin,2));
+  setText('outCaudalBase', fmt(caudalLs,3) + ' L/s');
+  setText('outVolumenPeriodo', fmt(volumenPeriodoL,0) + ' L');
+  setText('outCloroActivo', fmt(cloroActivoG,2) + ' g de cloro activo');
+  setText('outConcentracion', fmt(concentracionPct,1) + ' %');
+
+  let preparacionDet = '';
+  let mensaje = '';
+  let observacion = '';
+
+  if(tipo === 'hth'){
+    preparacionDet = 'Disolver ' + fmt(cantidadProducto,2) + ' g de hipoclorito de calcio al ' + fmt(concentracionPct,1) + ' % en ' + fmt(volumenDisolucionMl,0) + ' mL de agua limpia.';
+    mensaje = 'Operador: coja el cloro granular y prepare ' + fmt(volumenDisolucionMl,0) + ' mL de solución con ' + fmt(cantidadProducto,2) + ' g de producto. Esa solución debe dosificarse para durar ' + fmt(horasAutonomia,1) + ' horas.';
+    observacion = 'Verifique residual libre en red. Si queda bajo, aumente gradualmente los gramos preparados; si supera 2,0 mg/L, reduzca la dosis.';
+  } else {
+    preparacionDet = 'Medir ' + fmt(cantidadProducto,2) + ' mL de hipoclorito de sodio al ' + fmt(concentracionPct,1) + ' % y completar hasta ' + fmt(volumenDisolucionMl,0) + ' mL con agua limpia.';
+    mensaje = 'Operador: mida ' + fmt(cantidadProducto,2) + ' mL de cloro líquido, complete a ' + fmt(volumenDisolucionMl,0) + ' mL y dosifique esa solución para que dure ' + fmt(horasAutonomia,1) + ' horas.';
+    observacion = 'Esta equivalencia para NaOCl es operativa. Si el proveedor reporta concentración de otra forma o densidad específica, conviene ajustar la fórmula a la ficha técnica del producto.';
+  }
+
+  setText('outPreparacionDet', preparacionDet);
+  setText('outObservacion', observacion);
+  document.getElementById('mensajeOperador').innerHTML = '<strong>Instrucción sugerida:</strong> ' + mensaje;
+
+  const residualMin = 0.3;
+  const residualMax = 2.0;
+  const notaNorma = ' Meta operativa configurada: ' + fmt(residualObjetivo,1) + ' mg/L. Rango aceptable en red: ' + fmt(residualMin,1) + ' a ' + fmt(residualMax,1) + ' mg/L.';
+  document.getElementById('mensajeOperador').innerHTML += '<br><span class="small">' + notaNorma + '</span>';
+}
+function resetForm(){
+  document.getElementById('modoCalculo').value = 'caudal';
+  document.getElementById('poblacion').value = 500;
+  document.getElementById('dotacion').value = 100;
+  document.getElementById('caudal').value = 1;
+  document.getElementById('volumenAgua').value = 1000;
+  document.getElementById('tipoCloro').value = 'hth';
+  document.getElementById('concentracion').value = 70;
+  document.getElementById('residualObjetivo').value = 1.0;
+  document.getElementById('demandaCloro').value = 0.5;
+  document.getElementById('volumenDisolucion').value = 500;
+  document.getElementById('horasAutonomia').value = 8;
+  toggleModo();
+  setText('outDosisAplicada','–');
+  setText('outProducto','–');
+  setText('outProductoUnidad','–');
+  setText('outPreparacion','–');
+  setText('outRitmo','–');
+  setText('outCaudalBase','–');
+  setText('outVolumenPeriodo','–');
+  setText('outCloroActivo','–');
+  setText('outConcentracion','–');
+  setText('outPreparacionDet','–');
+  setText('outObservacion','–');
+  document.getElementById('mensajeOperador').innerHTML = 'Ingrese los datos y pulse <strong>Calcular</strong>.';
+}
+
+document.getElementById('modoCalculo').addEventListener('change', toggleModo);
+document.getElementById('tipoCloro').addEventListener('change', setDefaultConcentration);
+document.getElementById('concentracion').addEventListener('input', ()=>{ document.getElementById('concentracion').dataset.userTouched='1'; });
+document.getElementById('btnCalcular').addEventListener('click', calcular);
+document.getElementById('btnLimpiar').addEventListener('click', resetForm);
+toggleModo();
+</script>
+</body>
+</html>

@@ -293,6 +293,43 @@
       .ps-summary-badge{width:100%; min-width:unset;}
     }
 
+
+    .table-toggle-header{
+      width:100%;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:1rem;
+      padding:0;
+      border:none;
+      background:transparent;
+      text-align:left;
+      cursor:pointer;
+    }
+    .table-toggle-copy{min-width:0;}
+    .table-toggle-header h5{color:#1f2937;}
+    .table-toggle-arrow{
+      flex:0 0 auto;
+      width:44px;
+      height:44px;
+      border-radius:999px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border:1px solid #d0d5dd;
+      background:#f8fafc;
+      color:#475467;
+      transition:all .2s ease;
+      box-shadow:0 2px 6px rgba(0,0,0,.04);
+    }
+    .table-toggle-arrow svg{width:22px;height:22px;transition:transform .2s ease;}
+    .table-toggle-header:hover .table-toggle-arrow{background:#eef4ff;border-color:#98a2b3;color:#1d4ed8;}
+    .table-toggle-header[aria-expanded="true"] .table-toggle-arrow svg{transform:rotate(90deg);}
+    @media (max-width:576px){
+      .table-toggle-header{align-items:flex-start;}
+      .table-toggle-arrow{margin-top:.15rem;}
+    }
+
   </style>
 </head>
 <body>
@@ -624,23 +661,55 @@
           </div>
         
 
-      <section class="soft-card p-3 mb-4">
-        <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
-          <h5 class="mb-0 me-auto">Resumen por municipio</h5>
-        </div>
-        <div class="table-responsive">
-          <table id="tblResumen" class="table table-striped table-hover w-100"></table>
         </div>
       </section>
 
-      <section class="soft-card p-3">
-        <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
-          <h5 class="mb-0 me-auto">Detalle</h5>
-          <select id="tblFiltroMunicipio" class="form-select form-select-sm" style="min-width:200px"><option value="">Tabla: todos los municipios</option></select>
-          <select id="tblFiltroEncuestador" class="form-select form-select-sm" style="min-width:220px"><option value="">Tabla: todos los encuestadores</option></select>
-        </div>
-        <div class="table-responsive">
-          <table id="tbl" class="table table-striped table-hover w-100"></table>
+      <section class="soft-card p-3 mb-4">
+        <button class="table-toggle-header" type="button" data-bs-toggle="collapse" data-bs-target="#tablasConsultaCollapse" aria-expanded="false" aria-controls="tablasConsultaCollapse">
+          <div class="table-toggle-copy">
+            <h5 class="mb-1">Tablas de consulta</h5>
+            <div class="section-note mb-0">Las tablas quedan ocultas en pestañas para reducir el ruido visual del tablero. Ábrelas solo cuando necesites consultar, filtrar o exportar registros.</div>
+          </div>
+          <span class="table-toggle-arrow" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+        </button>
+
+        <div class="collapse mt-3" id="tablasConsultaCollapse">
+          <ul class="nav nav-tabs" id="tablasFiltroTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active fw-semibold" id="tab-resumen-tab" data-bs-toggle="tab" data-bs-target="#tab-resumen" type="button" role="tab" aria-controls="tab-resumen" aria-selected="true">
+                Resumen por municipio
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link fw-semibold" id="tab-detalle-tab" data-bs-toggle="tab" data-bs-target="#tab-detalle" type="button" role="tab" aria-controls="tab-detalle" aria-selected="false">
+                Detalle de registros
+              </button>
+            </li>
+          </ul>
+
+          <div class="tab-content pt-3" id="tablasFiltroTabsContent">
+            <div class="tab-pane fade show active" id="tab-resumen" role="tabpanel" aria-labelledby="tab-resumen-tab" tabindex="0">
+              <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                <h6 class="mb-0 me-auto">Resumen por municipio</h6>
+              </div>
+              <div class="table-responsive">
+                <table id="tblResumen" class="table table-striped table-hover w-100"></table>
+              </div>
+            </div>
+
+            <div class="tab-pane fade" id="tab-detalle" role="tabpanel" aria-labelledby="tab-detalle-tab" tabindex="0">
+              <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                <h6 class="mb-0 me-auto">Detalle</h6>
+                <select id="tblFiltroMunicipio" class="form-select form-select-sm" style="min-width:200px"><option value="">Tabla: todos los municipios</option></select>
+                <select id="tblFiltroEncuestador" class="form-select form-select-sm" style="min-width:220px"><option value="">Tabla: todos los encuestadores</option></select>
+              </div>
+              <div class="table-responsive">
+                <table id="tbl" class="table table-striped table-hover w-100"></table>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
     </div>
@@ -1650,6 +1719,21 @@
       applyFiltersAndRender(true);
     });
     document.getElementById('btnCargar')?.addEventListener('click', loadData);
+
+    function ajustarTablasConsulta(){
+      if (DT_RESUMEN) DT_RESUMEN.columns.adjust().draw(false);
+      if (DT) DT.columns.adjust().draw(false);
+    }
+
+    document.querySelectorAll('#tablasFiltroTabs button[data-bs-toggle="tab"]').forEach(tabBtn => {
+      tabBtn.addEventListener('shown.bs.tab', () => {
+        ajustarTablasConsulta();
+      });
+    });
+
+    document.getElementById('tablasConsultaCollapse')?.addEventListener('shown.bs.collapse', () => {
+      setTimeout(ajustarTablasConsulta, 180);
+    });
 
     initMap();
     initCustomLayerPanel();

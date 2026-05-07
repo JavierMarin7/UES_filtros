@@ -672,8 +672,8 @@
                 <div id="kpiEntMunicipios" class="entregados-kpi-value">–</div>
               </div>
               <div class="entregados-kpi-card">
-                <div class="entregados-kpi-label">Ubicaciones beneficiadas</div>
-                <div id="kpiEntUbicaciones" class="entregados-kpi-value">–</div>
+                <div class="entregados-kpi-label">Filtros entregados a institución educativa</div>
+                <div id="kpiEntInstitucionEducativa" class="entregados-kpi-value">–</div>
               </div>
               <div class="entregados-kpi-card">
                 <div class="entregados-kpi-label">Población potencial beneficiada</div>
@@ -1223,10 +1223,9 @@
         .replace(/[\u0300-\u036f]/g, "");
     }
 
-    function papaParseUrl(url){
+    function papaParseText(csvText){
       return new Promise((resolve,reject)=>{
-        Papa.parse(url, {
-          download: true,
+        Papa.parse(csvText, {
           header: true,
           dynamicTyping: false,
           skipEmptyLines: true,
@@ -1236,15 +1235,24 @@
       });
     }
 
-    async function fetchCsvWithFallback(url){
+    async function fetchTextDecoded(url, encoding = 'utf-8'){
+      const response = await fetch(url, { cache: 'no-store' });
+      if(!response.ok) throw new Error(`No se pudo cargar CSV: ${response.status}`);
+      const buffer = await response.arrayBuffer();
+      return new TextDecoder(encoding).decode(buffer);
+    }
+
+    async function fetchCsvWithFallback(url, encoding = 'utf-8'){
       const finalUrl = url + (url.includes('?') ? '&' : '?') + '_=' + Date.now();
       try{
-        const res = await papaParseUrl(finalUrl);
+        const txt = await fetchTextDecoded(finalUrl, encoding);
+        const res = await papaParseText(txt);
         if(res?.data?.length) return res.data;
         throw new Error('CSV vacío');
       }catch(e1){
         const proxy = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(finalUrl);
-        const res = await papaParseUrl(proxy);
+        const txt = await fetchTextDecoded(proxy, encoding);
+        const res = await papaParseText(txt);
         if(res?.data?.length) return res.data;
         throw e1;
       }
@@ -1399,8 +1407,10 @@
       if (btn){ btn.disabled = true; btn.textContent = 'Cargando…'; }
       try{
         const [rowsEncuestas, rowsEntregados] = await Promise.all([
-          fetchCsvWithFallback(URL_ENCUESTAS),
-          fetchCsvWithFallback(URL_ENTREGADOS)
+          fetchCsvWithFallback(URL_ENCUESTAS, 'utf-8'),
+          // Filtros_Entregados_V1 puede venir desde Excel en codificación Windows-1252.
+          // Esto evita caracteres dañados como Instituci�n o Mar�a.
+          fetchCsvWithFallback(URL_ENTREGADOS, 'windows-1252')
         ]);
 
         RAW = rowsEncuestas.map(r=>{
@@ -1600,7 +1610,12 @@
 
       const totalFiltros = rows.reduce((acc, r) => acc + (Number(r.FILTROS) || 0), 0);
       const municipios = uniq(rows.map(r => r.MUNICIPIO)).length;
-      const ubicaciones = uniq(rows.map(r => rawEntregaVal(r.raw, ['Ubicación','UBICACION','Ubicacion','Localidad','LOCALIDAD']))).length;
+      const filtrosInstitucionEducativa = rows
+        .filter(r => {
+          const objeto = norm(rawEntregaVal(r.raw, ['Objeto','OBJETO']));
+          return objeto.includes('INSTITUCION EDUCATIVA') || objeto.includes('INSTITUCION') || objeto.includes('EDUCATIVA');
+        })
+        .reduce((acc, r) => acc + (Number(r.FILTROS) || 0), 0);
       const poblacion = rows.reduce((acc, r) => acc + parseNumberFlexible(rawEntregaVal(r.raw, ['Poblacion','Población','POBLACION'])), 0);
       const viviendas = rows
         .filter(r => norm(rawEntregaVal(r.raw, ['Objeto','OBJETO'])).includes('VIVIENDA'))
@@ -1613,7 +1628,7 @@
 
       setText('kpiEntTotal', totalFiltros);
       setText('kpiEntMunicipios', municipios);
-      setText('kpiEntUbicaciones', ubicaciones);
+      setText('kpiEntInstitucionEducativa', filtrosInstitucionEducativa);
       setText('kpiEntPoblacion', poblacion);
       setText('kpiEntViviendas', viviendas);
 

@@ -622,8 +622,12 @@
             <select id="fEstado" class="form-select form-select-sm"><option value="">Todos</option></select>
           </div>
           <div class="col-12 col-sm-6 col-md-2">
-            <label class="form-label filter-label mb-1">Actividad</label>
-            <select id="fActividad" class="form-select form-select-sm"><option value="">Todas</option></select>
+            <label class="form-label filter-label mb-1">Actividades</label>
+            <select id="fGrupoActividad" class="form-select form-select-sm"><option value="">Todas</option></select>
+          </div>
+          <div class="col-12 col-sm-6 col-md-2">
+            <label class="form-label filter-label mb-1">Código</label>
+            <select id="fActividad" class="form-select form-select-sm"><option value="">Todos</option></select>
           </div>
           <div class="col-12 col-md-5">
             <label class="form-label filter-label mb-1">Buscar texto</label>
@@ -753,7 +757,7 @@
               </div>
               <div class="col-12">
                 <div class="chart-card p-3 h-100">
-                  <h6 class="mb-2">Detalle de actividades por responsable</h6>
+                  <h6 class="mb-2">Detalle de códigos por responsable</h6>
                   <div class="section-note mb-2">Los registros se sombrean de forma tenue según el estado de cumplimiento: crítico, bajo, medio, cumplido o supera meta.</div>
                   <div class="table-responsive">
                     <table id="tblPersonaActividad" class="table table-striped table-hover w-100"></table>
@@ -904,7 +908,7 @@
               </div>
               <div class="col-12">
                 <div class="chart-card p-3 h-100">
-                  <h6 class="mb-2">Detalle de actividades del municipio</h6>
+                  <h6 class="mb-2">Detalle de códigos del municipio</h6>
                   <div class="section-note mb-2">Los registros se sombrean de forma tenue según su estado de cumplimiento.</div>
                   <div class="table-responsive">
                     <table id="tblMunicipioActividad" class="table table-striped table-hover w-100"></table>
@@ -971,7 +975,7 @@
             </div>
             <div class="col-12 col-xl-4">
               <div class="chart-card p-3 h-100">
-                <h6 class="mb-2">Actividades por pendiente</h6>
+                <h6 class="mb-2">Códigos por pendiente</h6>
                 <div class="chart-container-sm"><canvas id="chartActividad"></canvas></div>
               </div>
             </div>
@@ -1145,6 +1149,23 @@
         .replace(/(^|\s|\.|-)([a-záéíóúñ])/g, (m, sep, c) => sep + c.toUpperCase());
     }
 
+    function clasificarActividadJS(codigo){
+      let c = String(codigo ?? "").trim().toUpperCase().replace(",", ".").replace(/\s+/g, "").replace(/\.+$/g, "");
+
+      if(c === "12" || c.startsWith("12.")){
+        return "Actividades Administrativas";
+      }
+
+      const operativos = new Set([
+        "1.1","1.10","1.13","1.17","1.2","1.3","1.4","1.5","1.7","1.8",
+        "2.1","2.10","2.18","2.2","2.20","2.3",
+        "5.2","5.24","5.34","5.4"
+      ]);
+
+      if(operativos.has(c)) return "Operativo";
+      return "OTROS";
+    }
+
     function num(v){
       const n = Number(String(v ?? 0).replace(",","."));
       return Number.isFinite(n) ? n : 0;
@@ -1212,14 +1233,17 @@
       let cumplimiento = getVal(r,["CUMPLIMIENTO_CALCULADO","CUMPLIMIENTO"]);
       cumplimiento = cumplimiento === "" ? (programado > 0 ? ejecutado / programado : 0) : num(cumplimiento);
       const estado = getVal(r,["ESTADO_CUMPLIMIENTO"], estadoDesdeCumplimiento(cumplimiento));
-      const codigo = getVal(r,["CODIGO_ACTIVIDAD_NORMALIZADO","CODIGO_ACTIVIDAD"]);
+      const codigo = getVal(r,["CODIGO","CODIGO_ACTIVIDAD_NORMALIZADO","CODIGO_ACTIVIDAD"]);
+      const actividadesGrupo = getVal(r,["ACTIVIDADES","ACTIVIDAD_GRUPO","CLASIFICACION_ACTIVIDAD"], clasificarActividadJS(codigo));
       return {
         ...r,
         RESPONSABLE:getVal(r,["RESPONSABLE","NOMBRE"]),
         MUNICIPIO_NORMALIZADO:getVal(r,["MUNICIPIO_NORMALIZADO","MUNICIPIO"]),
         ES_MUNICIPIO:getVal(r,["ES_MUNICIPIO"]),
         TIPO_TERRITORIO:getVal(r,["TIPO_TERRITORIO"]),
+        CODIGO:codigo,
         CODIGO_ACTIVIDAD_NORMALIZADO:codigo,
+        ACTIVIDADES:actividadesGrupo,
         ARO:getVal(r,["ARO"]),
         PERIODO_NORMALIZADO:getVal(r,["PERIODO_NORMALIZADO","PERIODO"]),
         TIPO:getVal(r,["TIPO"]),
@@ -1353,7 +1377,7 @@
 
       document.getElementById("btnFiltrar").addEventListener("click", applyFilters);
       document.getElementById("btnLimpiar").addEventListener("click", ()=>{
-        ["fPeriodo","fAro","fTipo","fMunicipio","fResponsable","fEstado","fActividad","fTexto","fPersonaDetalle","fMunicipioDetalle"].forEach(id=>document.getElementById(id).value="");
+        ["fPeriodo","fAro","fTipo","fMunicipio","fResponsable","fEstado","fGrupoActividad","fActividad","fTexto","fPersonaDetalle","fMunicipioDetalle"].forEach(id=>document.getElementById(id).value="");
         applyFilters();
       });
 
@@ -1369,6 +1393,7 @@
         municipio:document.getElementById("fMunicipio").value,
         responsable:document.getElementById("fResponsable").value,
         estado:document.getElementById("fEstado").value,
+        grupoActividad:document.getElementById("fGrupoActividad").value,
         actividad:document.getElementById("fActividad").value,
         texto:norm(document.getElementById("fTexto").value)
       };
@@ -1380,9 +1405,10 @@
         if(f.municipio && String(r.MUNICIPIO_NORMALIZADO)!==f.municipio) return false;
         if(f.responsable && String(r.RESPONSABLE)!==f.responsable) return false;
         if(f.estado && String(r.ESTADO_CUMPLIMIENTO)!==f.estado) return false;
+        if(f.grupoActividad && String(r.ACTIVIDADES)!==f.grupoActividad) return false;
         if(f.actividad && String(r.CODIGO_ACTIVIDAD_NORMALIZADO)!==f.actividad) return false;
         if(f.texto){
-          const blob = norm([r.RESPONSABLE,r.MUNICIPIO_NORMALIZADO,r.CODIGO_ACTIVIDAD_NORMALIZADO,r.ARO,r.TIPO,r.ESTADO_CUMPLIMIENTO].join(" "));
+          const blob = norm([r.RESPONSABLE,r.MUNICIPIO_NORMALIZADO,r.ACTIVIDADES,r.CODIGO_ACTIVIDAD_NORMALIZADO,r.ARO,r.TIPO,r.ESTADO_CUMPLIMIENTO].join(" "));
           if(!blob.includes(f.texto)) return false;
         }
         return true;
@@ -1403,7 +1429,7 @@
       const items = [];
       const add = (label,value) => {if(value) items.push(`<span class="active-filter-chip"><span>${label}:</span> ${value}</span>`)};
       add("Periodo",f.periodo); add("ARO",f.aro); add("Tipo",f.tipo); add("Municipio",f.municipio); add("Responsable",f.responsable);
-      add("Estado",f.estado); add("Actividad",f.actividad); add("Texto",document.getElementById("fTexto").value);
+      add("Estado",f.estado); add("Actividades",f.grupoActividad); add("Código",f.actividad); add("Texto",document.getElementById("fTexto").value);
       document.getElementById("activeFilters").innerHTML = items.length ? items.join("") : `<span class="text-muted">Sin filtros adicionales</span>`;
     }
 
@@ -1480,7 +1506,7 @@
       let data;
 
       if(persona){
-        title.textContent = "Programado vs ejecutado por actividad";
+        title.textContent = "Programado vs ejecutado por código";
         data = groupSummary(rows, r=>r.CODIGO_ACTIVIDAD_NORMALIZADO)
           .sort((a,b)=>b.programado-a.programado)
           .slice(0,12);
@@ -1557,7 +1583,7 @@
           {title:"Responsable"},
           {title:"Tipo"},
           {title:"ARO"},
-          {title:"Actividad"},
+          {title:"Código"},
           {title:"Programado"},
           {title:"Ejecutado"},
           {title:"Pendiente"},
@@ -1664,7 +1690,7 @@
       let data;
 
       if(municipio){
-        title.textContent = "Programado vs ejecutado por actividad";
+        title.textContent = "Programado vs ejecutado por código";
         data = groupSummary(rows, r=>r.CODIGO_ACTIVIDAD_NORMALIZADO)
           .sort((a,b)=>b.programado-a.programado)
           .slice(0,12);
@@ -1750,7 +1776,7 @@
           {title:"Municipio"},
           {title:"ARO"},
           {title:"Responsable"},
-          {title:"Actividad"},
+          {title:"Código"},
           {title:"Programado"},
           {title:"Ejecutado"},
           {title:"Pendiente"},
@@ -2177,7 +2203,7 @@
 
     function renderTables(){
       buildGenericTable("#tblDetalle","DT_DETALLE", tableDataDetalle(LIST), [
-        {title:"Periodo"},{title:"Responsable"},{title:"Tipo"},{title:"ARO"},{title:"Municipio"},{title:"Actividad"},
+        {title:"Periodo"},{title:"Responsable"},{title:"Tipo"},{title:"ARO"},{title:"Municipio"},{title:"Código"},
         {title:"Programado"},{title:"Ejecutado"},{title:"Pendiente"},{title:"Cumplimiento"},{title:"Estado"}
       ], 8);
 
@@ -2216,18 +2242,23 @@
       ], 5);
 
       const actFiltered = ACTIVIDAD.filter(r=>{
+        const grupo = document.getElementById("fGrupoActividad").value;
         const act = document.getElementById("fActividad").value;
         const aro = document.getElementById("fAro").value;
-        if(act && getVal(r,["CODIGO_ACTIVIDAD_NORMALIZADO"]) !== act) return false;
+        const codigoResumen = getVal(r,["CODIGO","CODIGO_ACTIVIDAD_NORMALIZADO","CODIGO_ACTIVIDAD"]);
+        const grupoResumen = getVal(r,["ACTIVIDADES"], clasificarActividadJS(codigoResumen));
+        if(grupo && grupoResumen !== grupo) return false;
+        if(act && codigoResumen !== act) return false;
         if(aro && getVal(r,["ARO"]) !== aro) return false;
         return true;
       });
       buildGenericTable("#tblActividad","DT_ACTIVIDAD", actFiltered.map(r=>[
-        getVal(r,["CODIGO_ACTIVIDAD_NORMALIZADO"]),getVal(r,["ARO"]),
+        getVal(r,["ACTIVIDADES"], clasificarActividadJS(getVal(r,["CODIGO","CODIGO_ACTIVIDAD_NORMALIZADO","CODIGO_ACTIVIDAD"]))),
+        getVal(r,["CODIGO","CODIGO_ACTIVIDAD_NORMALIZADO","CODIGO_ACTIVIDAD"]),getVal(r,["ARO"]),
         fmtInt(getVal(r,["PROGRAMADO"])),fmtInt(getVal(r,["EJECUTADO"])),fmtInt(Math.max(0,num(getVal(r,["PENDIENTE"])))),
         fmtPct(getVal(r,["CUMPLIMIENTO"])),`<span class="status-badge ${estadoClass(getVal(r,["ESTADO_CUMPLIMIENTO"]))}">${getVal(r,["ESTADO_CUMPLIMIENTO"])}</span>`
       ]), [
-        {title:"Actividad"},{title:"ARO"},{title:"Programado"},{title:"Ejecutado"},{title:"Pendiente"},{title:"Cumplimiento"},{title:"Estado"}
+        {title:"Actividades"},{title:"Código"},{title:"ARO"},{title:"Programado"},{title:"Ejecutado"},{title:"Pendiente"},{title:"Cumplimiento"},{title:"Estado"}
       ], 4);
     }
 
@@ -2272,7 +2303,7 @@
     });
 
     document.getElementById("btnLimpiarFiltrosAnalitica")?.addEventListener("click",()=>{
-      ["fPeriodo","fAro","fTipo","fMunicipio","fResponsable","fEstado","fActividad","fTexto","fPersonaDetalle","fMunicipioDetalle"].forEach(id=>{
+      ["fPeriodo","fAro","fTipo","fMunicipio","fResponsable","fEstado","fGrupoActividad","fActividad","fTexto","fPersonaDetalle","fMunicipioDetalle"].forEach(id=>{
         const el = document.getElementById(id);
         if(el) el.value = "";
       });

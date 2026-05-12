@@ -43,6 +43,24 @@
     .small-table td{ padding:.45rem .6rem; }
     .foot-note{ font-size:.86rem; color:#6b7280; }
     @media (max-width:576px){ .board{ padding-left:10px; padding-right:10px; } }
+  
+    .nav-card{border:0;border-radius:1rem;box-shadow:var(--shadow-soft);background:#fff;}
+    .navbar .nav-link,.navbar .dropdown-toggle{font-weight:600;}
+    .dropdown-menu .dropdown-item.active{background:#2e64d2;}
+    .nav-processes{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;}
+    .process-btn{
+      background:#f8fafc;
+      border:1px solid #d0d5dd;
+      border-radius:999px;
+      padding:.65rem 1rem !important;
+      color:#344054 !important;
+      font-weight:700;
+      box-shadow:0 2px 6px rgba(0,0,0,.04);
+      transition:all .2s ease;
+    }
+    .process-btn:hover{background:#eef4ff;border-color:#98a2b3;}
+    .process-btn.active{background:#2e64d2;color:#fff !important;border-color:#2e64d2;}
+
   </style>
 </head>
 <body>
@@ -62,7 +80,62 @@
         </div>
       </header>
 
-      <section class="soft-card p-3 mb-3">
+      
+
+      <section class="nav-card p-3 mb-3">
+        <nav class="navbar navbar-expand-lg bg-white rounded-4">
+          <div class="container-fluid d-flex flex-column align-items-center">
+            <div class="fw-bold mb-3 fs-5">Procesos</div>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navPrincipal">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-center" id="navPrincipal">
+              <ul class="navbar-nav mb-2 mb-lg-0 nav-processes">
+                <li class="nav-item dropdown mx-2 my-1">
+                  <a class="nav-link dropdown-toggle process-btn active" href="#" role="button" data-bs-toggle="dropdown">
+                    1. Agua para consumo humano y saneamiento básico
+                  </a>
+                  <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="https://javiermarin7.github.io/UESVALLE/ircas.html">1.1 IRCAS</a></li>
+                    <li><a class="dropdown-item" href="https://javiermarin7.github.io/UESVALLE/index.html">1.2 Filtros</a></li>
+                    <li><a class="dropdown-item" href="https://javiermarin7.github.io/UESVALLE/seguimiento_ach.html">1.3 Seguimiento Actividades Agua para Consumo Humano</a></li>
+                    <li><a class="dropdown-item active" href="https://javiermarin7.github.io/UESVALLE/Dosificacion_cloro.html">1.4 Dosificación de cloro</a></li>
+                  </ul>
+                </li>
+
+                <li class="nav-item dropdown mx-2 my-1">
+                  <a class="nav-link dropdown-toggle process-btn" href="#" role="button" data-bs-toggle="dropdown">
+                    2. Alimentos y medicamentos
+                  </a>
+                  <ul class="dropdown-menu">
+                    <li><a class="dropdown-item disabled" href="#">Próximamente</a></li>
+                  </ul>
+                </li>
+
+                <li class="nav-item dropdown mx-2 my-1">
+                  <a class="nav-link dropdown-toggle process-btn" href="#" role="button" data-bs-toggle="dropdown">
+                    3. Zoonosis y ETV
+                  </a>
+                  <ul class="dropdown-menu">
+                    <li><a class="dropdown-item disabled" href="#">Próximamente</a></li>
+                  </ul>
+                </li>
+
+                <li class="nav-item dropdown mx-2 my-1">
+                  <a class="nav-link dropdown-toggle process-btn" href="#" role="button" data-bs-toggle="dropdown">
+                    4. Establecimientos de interés sanitario
+                  </a>
+                  <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="https://javiermarin7.github.io/UESVALLE/piscinas.html">5.4 Piscinas</a></li>
+                    <li><a class="dropdown-item" href="https://javiermarin7.github.io/UESVALLE/empresas_plaguicidas.html">5.5 Empresas aplicadoras de plaguicidas</a></li>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </nav>
+      </section>
+<section class="soft-card p-3 mb-3">
         <div class="d-flex flex-column flex-lg-row align-items-lg-center gap-2">
           <div class="me-auto">
             <h1 class="board-title">Calculadora operativa de dosis de cloro</h1>
@@ -468,5 +541,6 @@
     actualizarEtiquetasAplicacion();
     calcular();
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

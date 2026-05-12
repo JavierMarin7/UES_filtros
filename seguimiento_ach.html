@@ -460,6 +460,113 @@
       .municipio-kpi-row{grid-template-columns:1fr;}
     }
 
+
+    .multi-select-hint{
+      font-size:.74rem;
+      color:#667085;
+      margin-top:3px;
+    }
+    select[multiple].form-select{
+      min-height:82px;
+      padding-top:.35rem;
+      padding-bottom:.35rem;
+    }
+
+    .multi-filter{
+      position:relative;
+      width:100%;
+    }
+    .multi-filter-btn{
+      width:100%;
+      min-height:35px;
+      border:1px solid #d0d5dd;
+      background:#fff;
+      color:#344054;
+      border-radius:.65rem;
+      font-size:.92rem;
+      text-align:left;
+      padding:.35rem 2.1rem .35rem .75rem;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:.5rem;
+      box-shadow:0 1px 2px rgba(16,24,40,.03);
+    }
+    .multi-filter-btn:hover{
+      background:#f8fafc;
+      border-color:#98a2b3;
+    }
+    .multi-filter-btn::after{
+      content:"";
+      position:absolute;
+      right:.85rem;
+      width:.55rem;
+      height:.55rem;
+      border-right:2px solid #667085;
+      border-bottom:2px solid #667085;
+      transform:rotate(45deg);
+      margin-top:-.15rem;
+    }
+    .multi-filter-menu{
+      width:100%;
+      max-height:280px;
+      overflow:auto;
+      border-radius:.85rem;
+      border:1px solid #d0d5dd;
+      box-shadow:0 12px 28px rgba(16,24,40,.16);
+      padding:.55rem;
+    }
+    .multi-filter-actions{
+      display:flex;
+      gap:.4rem;
+      padding:.35rem .25rem .55rem;
+      border-bottom:1px solid #edf1f7;
+      margin-bottom:.4rem;
+      position:sticky;
+      top:0;
+      background:#fff;
+      z-index:1;
+    }
+    .multi-filter-actions button{
+      font-size:.74rem;
+      padding:.25rem .5rem;
+      border-radius:999px;
+    }
+    .multi-filter-option{
+      display:flex;
+      align-items:center;
+      gap:.5rem;
+      padding:.38rem .45rem;
+      border-radius:.5rem;
+      font-size:.86rem;
+      color:#344054;
+      cursor:pointer;
+      user-select:none;
+    }
+    .multi-filter-option:hover{
+      background:#eef4ff;
+    }
+    .multi-filter-option input{
+      margin:0;
+    }
+    .multi-filter-count{
+      font-weight:650;
+      color:#344054;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .filters-actions{
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap:.55rem;
+      flex-wrap:wrap;
+      width:100%;
+      margin-top:.35rem;
+    }
+
     .dt-buttons .btn{margin-right:.25rem}
     .table{font-size:.86rem}
     footer{color:#667085;font-size:.86rem;padding-bottom:2rem}
@@ -611,7 +718,18 @@
           </div>
           <div class="col-12 col-sm-6 col-md-3">
             <label class="form-label filter-label mb-1">Municipio</label>
-            <select id="fMunicipio" class="form-select form-select-sm"><option value="">Todos</option></select>
+            <div class="dropdown multi-filter" id="wrapMunicipio">
+              <button class="multi-filter-btn dropdown-toggle" type="button" id="btnMunicipioMulti" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                <span class="multi-filter-count" id="txtMunicipioMulti">Todos los municipios</span>
+              </button>
+              <div class="dropdown-menu multi-filter-menu" aria-labelledby="btnMunicipioMulti">
+                <div class="multi-filter-actions">
+                  <button type="button" class="btn btn-sm btn-outline-primary" data-multi-action="all" data-target="fMunicipio">Todos</button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary" data-multi-action="none" data-target="fMunicipio">Limpiar</button>
+                </div>
+                <div id="fMunicipio" class="multi-filter-options"></div>
+              </div>
+            </div>
           </div>
           <div class="col-12 col-sm-6 col-md-3">
             <label class="form-label filter-label mb-1">Responsable</label>
@@ -623,19 +741,43 @@
           </div>
           <div class="col-12 col-sm-6 col-md-2">
             <label class="form-label filter-label mb-1">Actividades</label>
-            <select id="fGrupoActividad" class="form-select form-select-sm"><option value="">Todas</option></select>
+            <div class="dropdown multi-filter" id="wrapActividades">
+              <button class="multi-filter-btn dropdown-toggle" type="button" id="btnActividadesMulti" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                <span class="multi-filter-count" id="txtActividadesMulti">Todas las actividades</span>
+              </button>
+              <div class="dropdown-menu multi-filter-menu" aria-labelledby="btnActividadesMulti">
+                <div class="multi-filter-actions">
+                  <button type="button" class="btn btn-sm btn-outline-primary" data-multi-action="all" data-target="fGrupoActividad">Todas</button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary" data-multi-action="none" data-target="fGrupoActividad">Limpiar</button>
+                </div>
+                <div id="fGrupoActividad" class="multi-filter-options"></div>
+              </div>
+            </div>
           </div>
           <div class="col-12 col-sm-6 col-md-2">
             <label class="form-label filter-label mb-1">Código</label>
-            <select id="fActividad" class="form-select form-select-sm"><option value="">Todos</option></select>
+            <div class="dropdown multi-filter" id="wrapCodigo">
+              <button class="multi-filter-btn dropdown-toggle" type="button" id="btnCodigoMulti" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                <span class="multi-filter-count" id="txtCodigoMulti">Todos los códigos</span>
+              </button>
+              <div class="dropdown-menu multi-filter-menu" aria-labelledby="btnCodigoMulti">
+                <div class="multi-filter-actions">
+                  <button type="button" class="btn btn-sm btn-outline-primary" data-multi-action="all" data-target="fActividad">Todos</button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary" data-multi-action="none" data-target="fActividad">Limpiar</button>
+                </div>
+                <div id="fActividad" class="multi-filter-options"></div>
+              </div>
+            </div>
           </div>
           <div class="col-12 col-md-5">
             <label class="form-label filter-label mb-1">Buscar texto</label>
             <input id="fTexto" class="form-control form-control-sm" placeholder="Nombre, municipio, actividad, ARO..." />
           </div>
-          <div class="col-12 col-md-3 d-flex gap-2 justify-content-center justify-content-md-end pt-2 flex-wrap">
-            <button id="btnFiltrar" class="btn btn-primary btn-sm px-4">Aplicar filtros</button>
-            <button id="btnLimpiar" class="btn btn-outline-secondary btn-sm px-4">Limpiar</button>
+          <div class="col-12">
+            <div class="filters-actions">
+              <button id="btnFiltrar" class="btn btn-primary btn-sm px-4">Aplicar filtros</button>
+              <button id="btnLimpiar" class="btn btn-outline-secondary btn-sm px-4">Limpiar</button>
+            </div>
           </div>
         </div>
       </section>
@@ -1358,18 +1500,189 @@
       if(values.map(String).includes(String(current))) el.value = current;
     }
 
+    function fillSelectActividades(){
+      const el = document.getElementById("fGrupoActividad");
+      if(!el) return;
+      const current = selectedValues("fGrupoActividad");
+      const orden = ["Operativo", "Actividades Administrativas", "OTROS"];
+      const existentes = new Set(DETALLE.map(d=>d.ACTIVIDADES).filter(v => String(v ?? "").trim() !== ""));
+      const values = orden.filter(v => existentes.has(v));
+      [...existentes].forEach(v => { if(!values.includes(v)) values.push(v); });
+
+      if(el.classList.contains("multi-filter-options")){
+        el.innerHTML = values.map((v, idx) => {
+          const safe = String(v).replaceAll('"','&quot;');
+          const checked = current.includes(String(v)) ? "checked" : "";
+          return `
+            <label class="multi-filter-option" for="fGrupoActividad_${idx}">
+              <input type="checkbox" id="fGrupoActividad_${idx}" value="${safe}" ${checked}>
+              <span>${v}</span>
+            </label>
+          `;
+        }).join("");
+
+        el.querySelectorAll("input[type='checkbox']").forEach(chk => {
+          chk.addEventListener("change", () => updateMultiLabel("fGrupoActividad"));
+        });
+
+        updateMultiLabel("fGrupoActividad");
+        return;
+      }
+
+      el.innerHTML = `<option value="">Todas</option>` + values.map(v => `<option>${v}</option>`).join("");
+      if(values.includes(current[0])) el.value = current[0];
+    }
+
+    function selectedValues(id){
+      const el = document.getElementById(id);
+      if(!el) return [];
+
+      if(el.classList.contains("multi-filter-options")){
+        return Array.from(el.querySelectorAll("input[type='checkbox']:checked"))
+          .map(chk => chk.value)
+          .filter(v => String(v ?? "").trim() !== "");
+      }
+
+      if(el.multiple){
+        return Array.from(el.selectedOptions).map(o => o.value).filter(v => String(v ?? "").trim() !== "");
+      }
+
+      const v = el.value;
+      return String(v ?? "").trim() === "" ? [] : [v];
+    }
+
+    function clearSelect(id){
+      const el = document.getElementById(id);
+      if(!el) return;
+
+      if(el.classList.contains("multi-filter-options")){
+        el.querySelectorAll("input[type='checkbox']").forEach(chk => chk.checked = false);
+        updateMultiLabel(id);
+        return;
+      }
+
+      if(el.multiple){
+        Array.from(el.options).forEach(o => o.selected = false);
+      }else{
+        el.value = "";
+      }
+    }
+
+    function fillMultiSelect(id, values){
+      const el = document.getElementById(id);
+      if(!el) return;
+
+      const current = selectedValues(id);
+      values = [...values].sort((a,b)=>String(a).localeCompare(String(b),"es",{numeric:true}));
+
+      if(el.classList.contains("multi-filter-options")){
+        el.innerHTML = values.map((v, idx) => {
+          const safe = String(v).replaceAll('"','&quot;');
+          const checked = current.includes(String(v)) ? "checked" : "";
+          return `
+            <label class="multi-filter-option" for="${id}_${idx}">
+              <input type="checkbox" id="${id}_${idx}" value="${safe}" ${checked}>
+              <span>${v}</span>
+            </label>
+          `;
+        }).join("");
+
+        el.querySelectorAll("input[type='checkbox']").forEach(chk => {
+          chk.addEventListener("change", () => updateMultiLabel(id));
+        });
+
+        updateMultiLabel(id);
+        return;
+      }
+
+      el.innerHTML = values.map(v => `<option value="${String(v).replaceAll('"','&quot;')}">${v}</option>`).join("");
+      Array.from(el.options).forEach(o => {
+        if(current.includes(o.value)) o.selected = true;
+      });
+    }
+
+    function updateMultiLabel(id){
+      const values = selectedValues(id);
+      const total = document.getElementById(id)?.querySelectorAll("input[type='checkbox']").length || 0;
+
+      if(id === "fMunicipio"){
+        const label = document.getElementById("txtMunicipioMulti");
+        if(!label) return;
+        if(!values.length) label.textContent = "Todos los municipios";
+        else if(values.length === 1) label.textContent = values[0];
+        else label.textContent = `${values.length} municipios seleccionados`;
+      }
+
+      if(id === "fActividad"){
+        const label = document.getElementById("txtCodigoMulti");
+        if(!label) return;
+        if(!values.length) label.textContent = "Todos los códigos";
+        else if(values.length === 1) label.textContent = values[0];
+        else label.textContent = `${values.length} códigos seleccionados`;
+      }
+
+      if(id === "fGrupoActividad"){
+        const label = document.getElementById("txtActividadesMulti");
+        if(!label) return;
+        if(!values.length) label.textContent = "Todas las actividades";
+        else if(values.length === 1) label.textContent = values[0];
+        else label.textContent = `${values.length} actividades seleccionadas`;
+      }
+    }
+
+    function setMultiValue(id, value){
+      clearSelect(id);
+      const el = document.getElementById(id);
+      if(!el) return;
+
+      if(el.classList.contains("multi-filter-options")){
+        el.querySelectorAll("input[type='checkbox']").forEach(chk => {
+          chk.checked = chk.value === value;
+        });
+        updateMultiLabel(id);
+        return;
+      }
+
+      if(el.multiple){
+        Array.from(el.options).forEach(o => { o.selected = o.value === value; });
+      }else{
+        el.value = value;
+      }
+    }
+
+    function setupMultiActions(){
+      document.querySelectorAll("[data-multi-action]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const id = btn.dataset.target;
+          const action = btn.dataset.multiAction;
+          const el = document.getElementById(id);
+          if(!el) return;
+
+          if(action === "all"){
+            el.querySelectorAll("input[type='checkbox']").forEach(chk => chk.checked = true);
+          }else{
+            el.querySelectorAll("input[type='checkbox']").forEach(chk => chk.checked = false);
+          }
+
+          updateMultiLabel(id);
+          applyFilters();
+        });
+      });
+    }
+
     function fillFilters(){
       fillSelect("fPeriodo", uniq(DETALLE.map(d=>d.PERIODO_NORMALIZADO)));
       fillSelect("fAro", uniq(DETALLE.map(d=>d.ARO)));
       fillSelect("fTipo", uniq(DETALLE.map(d=>d.TIPO)));
-      fillSelect("fMunicipio", uniq(DETALLE.filter(d=>["SI","SÍ"].includes(norm(d.ES_MUNICIPIO)) || norm(d.TIPO_TERRITORIO)==="MUNICIPIO").map(d=>d.MUNICIPIO_NORMALIZADO)));
+      fillMultiSelect("fMunicipio", uniq(DETALLE.filter(d=>["SI","SÍ"].includes(norm(d.ES_MUNICIPIO)) || norm(d.TIPO_TERRITORIO)==="MUNICIPIO").map(d=>d.MUNICIPIO_NORMALIZADO)));
       fillSelect("fResponsable", uniq(DETALLE.map(d=>d.RESPONSABLE)));
       fillSelect("fEstado", uniq(DETALLE.map(d=>d.ESTADO_CUMPLIMIENTO)));
-      fillSelect("fActividad", uniq(DETALLE.map(d=>d.CODIGO_ACTIVIDAD_NORMALIZADO)), "Todas");
+      fillSelectActividades();
+      fillMultiSelect("fActividad", uniq(DETALLE.map(d=>d.CODIGO_ACTIVIDAD_NORMALIZADO)));
       fillSelect("fPersonaDetalle", uniq(DETALLE.map(d=>d.RESPONSABLE)), "Todos los responsables filtrados");
       fillSelect("fMunicipioDetalle", uniq(DETALLE.filter(d=>["SI","SÍ"].includes(norm(d.ES_MUNICIPIO)) || norm(d.TIPO_TERRITORIO)==="MUNICIPIO").map(d=>d.MUNICIPIO_NORMALIZADO)), "Todos los municipios filtrados");
 
-      ["fPeriodo","fAro","fTipo","fMunicipio","fResponsable","fEstado","fActividad","fTexto"].forEach(id=>{
+      ["fPeriodo","fAro","fTipo","fMunicipio","fResponsable","fEstado","fGrupoActividad","fActividad","fTexto"].forEach(id=>{
         const el = document.getElementById(id);
         el.addEventListener("change", applyFilters);
         el.addEventListener("input", applyFilters);
@@ -1377,12 +1690,14 @@
 
       document.getElementById("btnFiltrar").addEventListener("click", applyFilters);
       document.getElementById("btnLimpiar").addEventListener("click", ()=>{
-        ["fPeriodo","fAro","fTipo","fMunicipio","fResponsable","fEstado","fGrupoActividad","fActividad","fTexto","fPersonaDetalle","fMunicipioDetalle"].forEach(id=>document.getElementById(id).value="");
+        ["fPeriodo","fAro","fTipo","fMunicipio","fResponsable","fEstado","fGrupoActividad","fActividad","fTexto","fPersonaDetalle","fMunicipioDetalle"].forEach(id=>clearSelect(id));
         applyFilters();
       });
 
       document.getElementById("fPersonaDetalle").addEventListener("change", renderPersonaActividadSection);
       document.getElementById("fMunicipioDetalle").addEventListener("change", renderMunicipioActividadSection);
+
+      setupMultiActions();
     }
 
     function applyFilters(){
@@ -1390,11 +1705,11 @@
         periodo:document.getElementById("fPeriodo").value,
         aro:document.getElementById("fAro").value,
         tipo:document.getElementById("fTipo").value,
-        municipio:document.getElementById("fMunicipio").value,
+        municipios:selectedValues("fMunicipio"),
         responsable:document.getElementById("fResponsable").value,
         estado:document.getElementById("fEstado").value,
-        grupoActividad:document.getElementById("fGrupoActividad").value,
-        actividad:document.getElementById("fActividad").value,
+        gruposActividad:selectedValues("fGrupoActividad"),
+        codigos:selectedValues("fActividad"),
         texto:norm(document.getElementById("fTexto").value)
       };
 
@@ -1402,11 +1717,11 @@
         if(f.periodo && String(r.PERIODO_NORMALIZADO)!==f.periodo) return false;
         if(f.aro && String(r.ARO)!==f.aro) return false;
         if(f.tipo && String(r.TIPO)!==f.tipo) return false;
-        if(f.municipio && String(r.MUNICIPIO_NORMALIZADO)!==f.municipio) return false;
+        if(f.municipios.length && !f.municipios.includes(String(r.MUNICIPIO_NORMALIZADO))) return false;
         if(f.responsable && String(r.RESPONSABLE)!==f.responsable) return false;
         if(f.estado && String(r.ESTADO_CUMPLIMIENTO)!==f.estado) return false;
-        if(f.grupoActividad && String(r.ACTIVIDADES)!==f.grupoActividad) return false;
-        if(f.actividad && String(r.CODIGO_ACTIVIDAD_NORMALIZADO)!==f.actividad) return false;
+        if(f.gruposActividad.length && !f.gruposActividad.map(norm).includes(norm(r.ACTIVIDADES))) return false;
+        if(f.codigos.length && !f.codigos.includes(String(r.CODIGO_ACTIVIDAD_NORMALIZADO))) return false;
         if(f.texto){
           const blob = norm([r.RESPONSABLE,r.MUNICIPIO_NORMALIZADO,r.ACTIVIDADES,r.CODIGO_ACTIVIDAD_NORMALIZADO,r.ARO,r.TIPO,r.ESTADO_CUMPLIMIENTO].join(" "));
           if(!blob.includes(f.texto)) return false;
@@ -1428,8 +1743,13 @@
     function renderActiveFilters(f){
       const items = [];
       const add = (label,value) => {if(value) items.push(`<span class="active-filter-chip"><span>${label}:</span> ${value}</span>`)};
-      add("Periodo",f.periodo); add("ARO",f.aro); add("Tipo",f.tipo); add("Municipio",f.municipio); add("Responsable",f.responsable);
-      add("Estado",f.estado); add("Actividades",f.grupoActividad); add("Código",f.actividad); add("Texto",document.getElementById("fTexto").value);
+      add("Periodo",f.periodo); add("ARO",f.aro); add("Tipo",f.tipo);
+      add("Municipio", f.municipios.length ? f.municipios.join(", ") : "");
+      add("Responsable",f.responsable);
+      add("Estado",f.estado);
+      add("Actividades", f.gruposActividad.length ? f.gruposActividad.join(", ") : "");
+      add("Código", f.codigos.length ? f.codigos.join(", ") : "");
+      add("Texto",document.getElementById("fTexto").value);
       document.getElementById("activeFilters").innerHTML = items.length ? items.join("") : `<span class="text-muted">Sin filtros adicionales</span>`;
     }
 
@@ -1887,7 +2207,7 @@
         if(!elements?.length) return;
         const selected = byMun[elements[0].index]?.key;
         if(selected){
-          document.getElementById("fMunicipio").value = selected;
+          setMultiValue("fMunicipio", selected);
           document.getElementById("fMunicipioDetalle").value = selected;
           applyFilters();
         }
@@ -1898,7 +2218,7 @@
         if(!elements?.length) return;
         const selected = byAct[elements[0].index]?.key;
         if(selected){
-          document.getElementById("fActividad").value = selected;
+          setMultiValue("fActividad", selected);
           applyFilters();
         }
       }});
@@ -2208,10 +2528,10 @@
       ], 8);
 
       const municipalFiltered = MUNICIPAL.filter(r=>{
-        const m = document.getElementById("fMunicipio").value;
+        const municipios = selectedValues("fMunicipio");
         const aro = document.getElementById("fAro").value;
         const periodo = document.getElementById("fPeriodo").value;
-        if(m && getVal(r,["MUNICIPIO_NORMALIZADO"]) !== m) return false;
+        if(municipios.length && !municipios.includes(getVal(r,["MUNICIPIO_NORMALIZADO"]))) return false;
         if(aro && getVal(r,["ARO"]) !== aro) return false;
         if(periodo && getVal(r,["PERIODO_NORMALIZADO"]) !== periodo) return false;
         return true;
@@ -2242,13 +2562,13 @@
       ], 5);
 
       const actFiltered = ACTIVIDAD.filter(r=>{
-        const grupo = document.getElementById("fGrupoActividad").value;
-        const act = document.getElementById("fActividad").value;
+        const grupos = selectedValues("fGrupoActividad");
+        const codigos = selectedValues("fActividad");
         const aro = document.getElementById("fAro").value;
         const codigoResumen = getVal(r,["CODIGO","CODIGO_ACTIVIDAD_NORMALIZADO","CODIGO_ACTIVIDAD"]);
         const grupoResumen = getVal(r,["ACTIVIDADES"], clasificarActividadJS(codigoResumen));
-        if(grupo && grupoResumen !== grupo) return false;
-        if(act && codigoResumen !== act) return false;
+        if(grupos.length && !grupos.map(norm).includes(norm(grupoResumen))) return false;
+        if(codigos.length && !codigos.includes(codigoResumen)) return false;
         if(aro && getVal(r,["ARO"]) !== aro) return false;
         return true;
       });
@@ -2305,7 +2625,7 @@
     document.getElementById("btnLimpiarFiltrosAnalitica")?.addEventListener("click",()=>{
       ["fPeriodo","fAro","fTipo","fMunicipio","fResponsable","fEstado","fGrupoActividad","fActividad","fTexto","fPersonaDetalle","fMunicipioDetalle"].forEach(id=>{
         const el = document.getElementById(id);
-        if(el) el.value = "";
+        if(el) clearSelect(id);
       });
       applyFilters();
       const analitica = document.getElementById("seccionAnaliticaPriorizacion");
